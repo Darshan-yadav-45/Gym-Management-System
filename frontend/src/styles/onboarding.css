@@ -1,0 +1,319 @@
+:root {
+  --fitflow-bg: #0a0a0a;
+  --fitflow-card: #151515;
+  --fitflow-accent: #ccff00; /* Energetic lime green */
+  --fitflow-accent-hover: #b3e600;
+  --fitflow-text-primary: #ffffff;
+  --fitflow-text-secondary: #a0a0a0;
+  --fitflow-border: #2a2a2a;
+}
+
+body {
+  background-color: var(--fitflow-bg);
+  color: var(--fitflow-text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Base Container */
+.onboarding-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--fitflow-bg);
+  background-image: radial-gradient(circle at 50% 0%, rgba(204, 255, 0, 0.05) 0%, transparent 50%);
+}
+
+/* Header & Progress */
+.onboarding-header {
+  padding: 2rem 5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+
+.onboarding-step-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--fitflow-text-secondary);
+  margin-bottom: 1rem;
+}
+
+.onboarding-progress-track {
+  width: 100%;
+  max-width: 600px;
+  height: 4px;
+  background-color: var(--fitflow-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.onboarding-progress-fill {
+  height: 100%;
+  background-color: var(--fitflow-accent);
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(204, 255, 0, 0.5);
+}
+
+/* Content Area */
+.onboarding-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5% 6rem;
+  position: relative;
+}
+
+.onboarding-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.onboarding-subtitle {
+  font-size: 1.1rem;
+  color: var(--fitflow-text-secondary);
+  text-align: center;
+  margin-bottom: 3rem;
+  max-width: 500px;
+}
+
+/* Footer & Controls */
+.onboarding-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to top, rgba(10, 10, 10, 1) 50%, transparent);
+  box-sizing: border-box;
+  z-index: 20;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--fitflow-accent);
+  color: #000;
+  border: none;
+  border-radius: 30px;
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--fitflow-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(204, 255, 0, 0.2);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--fitflow-text-primary);
+  border: 1px solid var(--fitflow-border);
+  border-radius: 30px;
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--fitflow-text-secondary);
+}
+
+/* Cards (Goals, Equipment) */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 900px;
+}
+
+.selection-card {
+  background-color: var(--fitflow-card);
+  border: 2px solid var(--fitflow-border);
+  border-radius: 20px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.selection-card.selected {
+  border-color: var(--fitflow-accent);
+  background-color: rgba(204, 255, 0, 0.05);
+}
+
+.selection-card.selected::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background-color: var(--fitflow-accent);
+}
+
+.selection-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border-color: rgba(204, 255, 0, 0.5);
+}
+
+.card-icon {
+  width: 64px;
+  height: 64px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  color: var(--fitflow-accent);
+}
+
+/* Sliders */
+.slider-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 3rem 0;
+}
+
+.slider-value {
+  font-size: 4rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--fitflow-accent);
+}
+
+/* Range input styling */
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  background: transparent;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  background: var(--fitflow-accent);
+  cursor: pointer;
+  margin-top: -10px;
+  box-shadow: 0 0 15px rgba(204, 255, 0, 0.6);
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  cursor: pointer;
+  background: var(--fitflow-border);
+  border-radius: 2px;
+}
+
+/* Body Model placeholders */
+.body-model-container {
+  position: relative;
+  width: 300px;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%);
+}
+
+.muscle-point {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.muscle-point:hover {
+  transform: scale(1.2);
+  background-color: rgba(204, 255, 0, 0.5);
+}
+
+.muscle-point.selected {
+  background-color: var(--fitflow-accent);
+  box-shadow: 0 0 15px var(--fitflow-accent);
+}
+
+/* Muscle Tags */
+.muscle-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 2rem;
+  max-width: 600px;
+}
+
+.muscle-tag {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  background-color: var(--fitflow-border);
+  color: var(--fitflow-text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.muscle-tag.selected {
+  background-color: rgba(204, 255, 0, 0.15);
+  color: var(--fitflow-accent);
+  border: 1px solid var(--fitflow-accent);
+}
+
+@media (max-width: 768px) {
+  .onboarding-title {
+    font-size: 2rem;
+  }
+  .onboarding-footer {
+    padding: 1rem;
+    flex-direction: column-reverse;
+    gap: 1rem;
+  }
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+  .onboarding-content {
+    padding-bottom: 8rem;
+  }
+}

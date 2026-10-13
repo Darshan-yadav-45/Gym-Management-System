@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.time.LocalDateTime;
 
-@Entity
+// @Entity
 @Table(name = "users",
        uniqueConstraints = {
            @UniqueConstraint(columnNames = "username"),

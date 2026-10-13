@@ -1,0 +1,30 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run FitFlow backend",
+			"type": "shell",
+			"command": "mvn",
+			"args": [
+				"-f",
+				"backend/pom.xml",
+				"spring-boot:run"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run FitFlow backend (retry)",
+			"type": "shell",
+			"command": "mvn",
+			"args": [
+				"-U",
+				"-f",
+				"backend/pom.xml",
+				"spring-boot:run"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}
