@@ -14,7 +14,7 @@ import OnboardingSummary from './OnboardingSummary';
 import { submitOnboardingData } from '../../services/onboardingService';
 import '../../styles/onboarding.css';
 
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 9;
 
 export default function OnboardingController() {
     const navigate = useNavigate();
@@ -35,11 +35,11 @@ export default function OnboardingController() {
             bmi: 22.5,
             goal: "",
             targetMuscles: [],
+            equipment: "",
             workoutFrequency: 4,
             selectedDays: [],
-            equipment: "",
-            preferredWorkoutTime: "",
-            workoutLocation: "",
+            preferredWorkoutTime: "MORNING",
+            workoutLocation: "GYM",
         };
     });
 
@@ -62,21 +62,20 @@ export default function OnboardingController() {
     };
 
     const calculateBMI = () => {
-        const heightM = onboardingData.height / 100;
-        const bmi = onboardingData.weight / (heightM * heightM);
-        handleUpdateData('bmi', bmi.toFixed(1));
+        const heightM = (onboardingData.height || 170) / 100;
+        const bmi = (onboardingData.weight || 65) / (heightM * heightM);
+        handleUpdateData('bmi', parseFloat(bmi.toFixed(1)));
     };
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
             await submitOnboardingData(onboardingData);
-            navigate('/dashboard'); // Navigate on success
         } catch (error) {
-            console.error("Failed to submit", error);
-            // In a real app, show error toast here
+            console.error("Failed to submit onboarding data:", error);
         } finally {
             setIsSubmitting(false);
+            navigate('/dashboard');
         }
     };
 
@@ -86,23 +85,20 @@ export default function OnboardingController() {
             case 2: return onboardingData.height > 100;
             case 3: return onboardingData.weight > 30;
             case 4: return onboardingData.goal !== "";
-            case 5: return onboardingData.targetMuscles.length > 0; // upper body
-            case 6: return true; // lower body (optional)
+            case 5: return (onboardingData.targetMuscles || []).length > 0;
+            case 6: return onboardingData.equipment !== "";
             case 7: return onboardingData.workoutFrequency > 0;
             case 8: return true; // loading/analysis screen
-            case 9: return true; // feature intro
-            case 10: return onboardingData.equipment !== "";
+            case 9: return true; // summary screen
             default: return true;
         }
     };
 
-    // Before leaving step 3, update BMI
     const handleNext = () => {
         if (currentStep === 3) calculateBMI();
         
-        // If on analysis step, auto-advance after delay
         if (currentStep === 7) {
-            nextStep(); // go to 8
+            nextStep(); // go to 8 (Plan Analysis)
         } else if (currentStep === TOTAL_STEPS) {
             handleSubmit();
         } else {
@@ -116,12 +112,11 @@ export default function OnboardingController() {
             case 2: return <HeightSlider data={onboardingData} update={handleUpdateData} />;
             case 3: return <WeightRuler data={onboardingData} update={handleUpdateData} />;
             case 4: return <GoalSelection data={onboardingData} update={handleUpdateData} onSelect={handleNext} />;
-            case 5: return <MuscleSelector data={onboardingData} update={handleUpdateData} type="upper" />;
-            case 6: return <MuscleSelector data={onboardingData} update={handleUpdateData} type="lower" />;
+            case 5: return <MuscleSelector data={onboardingData} update={handleUpdateData} />;
+            case 6: return <EquipmentSelection data={onboardingData} update={handleUpdateData} />;
             case 7: return <WorkoutFrequency data={onboardingData} update={handleUpdateData} />;
             case 8: return <PlanAnalysis data={onboardingData} onComplete={nextStep} />;
-            case 9: return <OnboardingSummary data={onboardingData} />;
-            case 10: return <EquipmentSelection data={onboardingData} update={handleUpdateData} />;
+            case 9: return <OnboardingSummary data={onboardingData} onNext={handleSubmit} isSubmitting={isSubmitting} />;
             default: return <div>Unknown Step</div>;
         }
     };
@@ -138,7 +133,8 @@ export default function OnboardingController() {
                 </StepTransition>
             </main>
 
-            {currentStep !== 8 && currentStep !== 9 && ( // Hide controls on analysis and summary steps if needed
+            {/* Footer buttons: visible on all steps except automated analysis step 8 */}
+            {currentStep !== 8 && (
                 <footer className="onboarding-footer">
                     <button 
                         className="btn-secondary" 
@@ -153,7 +149,11 @@ export default function OnboardingController() {
                         onClick={handleNext}
                         disabled={!isStepValid() || isSubmitting}
                     >
-                        {isSubmitting ? 'Loading...' : currentStep === TOTAL_STEPS ? 'Start My Fitness Journey' : 'Continue'}
+                        {isSubmitting 
+                            ? 'Starting...' 
+                            : currentStep === TOTAL_STEPS 
+                                ? 'Start My Fitness Journey →' 
+                                : 'Continue'}
                     </button>
                 </footer>
             )}

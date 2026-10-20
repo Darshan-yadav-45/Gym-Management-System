@@ -39,7 +39,7 @@ export default function RecoverPage() {
         </div>
 
         {/* Readiness Score Card */}
-        <div className="bg-[#12162B] border border-white/5 rounded-3xl p-5 shadow-xl relative overflow-hidden">
+        <div className="bg-[#14151b] border border-white/5 rounded-3xl p-5 shadow-xl relative overflow-hidden">
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
@@ -76,7 +76,7 @@ export default function RecoverPage() {
         </div>
 
         {/* Muscle Recovery Map */}
-        <div className="bg-[#12162B] border border-white/5 rounded-3xl p-5 shadow-xl space-y-3.5">
+        <div className="bg-[#14151b] border border-white/5 rounded-3xl p-5 shadow-xl space-y-3.5">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-extrabold text-white uppercase tracking-wider">
               Muscle Soreness & Recovery Map
@@ -104,7 +104,7 @@ export default function RecoverPage() {
 
         {/* Sleep & Hydration Protocol Card */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-[#12162B] border border-white/5 rounded-3xl p-4 shadow-xl">
+          <div className="bg-[#14151b] border border-white/5 rounded-3xl p-4 shadow-xl">
             <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-2.5">
               <Moon className="w-4 h-4" />
             </div>
@@ -113,7 +113,7 @@ export default function RecoverPage() {
             <p className="text-[10px] text-gray-400 mt-1">92% Restorative REM sleep</p>
           </div>
 
-          <div className="bg-[#12162B] border border-white/5 rounded-3xl p-4 shadow-xl">
+          <div className="bg-[#14151b] border border-white/5 rounded-3xl p-4 shadow-xl">
             <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center mb-2.5">
               <Droplets className="w-4 h-4" />
             </div>
@@ -124,13 +124,13 @@ export default function RecoverPage() {
         </div>
 
         {/* Recovery Protocols list */}
-        <div className="bg-[#12162B] border border-white/5 rounded-3xl p-5 shadow-xl space-y-3">
+        <div className="bg-[#14151b] border border-white/5 rounded-3xl p-5 shadow-xl space-y-3">
           <h3 className="text-xs font-extrabold text-gray-400 uppercase tracking-wider">
             Today's Recovery Protocols
           </h3>
 
           <div className="space-y-2 text-xs">
-            <div className="bg-[#181E3B] p-3 rounded-2xl flex items-center justify-between border border-white/5">
+            <div className="bg-[#181920] p-3 rounded-2xl flex items-center justify-between border border-white/5">
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <span className="text-gray-200">Upper body chest and doorway stretch (5 min)</span>
@@ -138,7 +138,7 @@ export default function RecoverPage() {
               <span className="text-[10px] text-emerald-400 font-bold">Done</span>
             </div>
 
-            <div className="bg-[#181E3B] p-3 rounded-2xl flex items-center justify-between border border-white/5">
+            <div className="bg-[#181920] p-3 rounded-2xl flex items-center justify-between border border-white/5">
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <span className="text-gray-200">Hydrate with 500ml water post-workout</span>
@@ -146,7 +146,7 @@ export default function RecoverPage() {
               <span className="text-[10px] text-emerald-400 font-bold">Done</span>
             </div>
 
-            <div className="bg-[#181E3B] p-3 rounded-2xl flex items-center justify-between border border-white/5">
+            <div className="bg-[#181920] p-3 rounded-2xl flex items-center justify-between border border-white/5">
               <div className="flex items-center gap-2.5">
                 <Activity className="w-4 h-4 text-blue-400 flex-shrink-0" />
                 <span className="text-gray-200">Triceps foam rolling & lacrosse ball release</span>

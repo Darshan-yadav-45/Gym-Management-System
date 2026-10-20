@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class DailyMetricService {
 
     public static final int DEFAULT_WATER_TARGET_ML = 3000;
@@ -24,6 +23,11 @@ public class DailyMetricService {
 
     private final DailyMetricRepository dailyMetricRepository;
     private final UserRepository userRepository;
+
+    public DailyMetricService(DailyMetricRepository dailyMetricRepository, UserRepository userRepository) {
+        this.dailyMetricRepository = dailyMetricRepository;
+        this.userRepository = userRepository;
+    }
 
     @Transactional(readOnly = true)
     public DailyMetricResponse getTodayMetrics(String email) {

@@ -1,33 +1,24 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:8080/api';
+import api from './api';
 
 export const submitOnboardingData = async (data) => {
     try {
-        // Prepare the payload for Spring Boot
         const payload = {
-            gender: data.gender,
-            heightCm: parseFloat(data.height),
-            weightKg: parseFloat(data.weight),
-            bmi: parseFloat(data.bmi),
-            fitnessGoal: data.goal,
-            targetMuscles: data.targetMuscles,
-            workoutsPerWeek: parseInt(data.workoutFrequency, 10),
-            preferredWorkoutTime: data.preferredWorkoutTime,
-            equipmentType: data.equipment,
-            workoutLocation: data.equipment === 'Full Gym' ? 'GYM' : 'HOME'
+            gender: data.gender || "MALE",
+            heightCm: parseFloat(data.height) || 170.0,
+            weightKg: parseFloat(data.weight) || 65.0,
+            bmi: parseFloat(data.bmi) || 22.5,
+            fitnessGoal: data.goal || "GENERAL_FITNESS",
+            targetMuscles: data.targetMuscles || [],
+            workoutsPerWeek: parseInt(data.workoutFrequency, 10) || 4,
+            preferredWorkoutTime: data.preferredWorkoutTime || "MORNING",
+            equipmentType: data.equipment || "NO_EQUIPMENT",
+            workoutLocation: data.equipment === 'FULL_GYM' ? 'GYM' : 'HOME'
         };
 
-        const response = await axios.post(`${API_URL}/onboarding`, payload, {
-            headers: {
-                'Content-Type': 'application/json',
-                // Add Authorization header here if needed
-                // 'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
+        const response = await api.post('/onboarding', payload);
         return response.data;
     } catch (error) {
         console.error("Error submitting onboarding data:", error);
-        throw error;
+        return null;
     }
 };

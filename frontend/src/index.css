@@ -1,24 +1,34 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 @config "../tailwind.config.js";
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
   body {
-    @apply bg-gym-darker text-gray-100 font-sans antialiased;
+    @apply bg-gym-darker text-gray-200 font-sans antialiased selection:bg-gym-accent selection:text-white;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display font-bold text-white tracking-tight;
+    @apply font-display font-bold text-white uppercase tracking-tight;
   }
 }
 
 @layer components {
+  .btn-pill-primary {
+    @apply bg-gym-accent text-white font-bold uppercase tracking-wider px-8 py-3.5 rounded-full hover:bg-gym-accentHover transition-all duration-300 shadow-[0_4px_20px_rgba(239,35,60,0.4)] hover:shadow-[0_6px_25px_rgba(239,35,60,0.6)] hover:-translate-y-0.5 inline-flex items-center justify-center;
+  }
+  .btn-pill-secondary {
+    @apply bg-transparent border-2 border-white/20 text-white font-bold uppercase tracking-wider px-8 py-3.5 rounded-full hover:border-gym-accent hover:bg-gym-accent transition-all duration-300 inline-flex items-center justify-center;
+  }
   .btn-primary {
-    @apply bg-gym-accent text-gym-darker font-semibold px-6 py-3 rounded-lg hover:bg-gym-accentHover transition-colors duration-200 shadow-[0_0_15px_rgba(0,255,127,0.3)] hover:shadow-[0_0_25px_rgba(0,255,127,0.5)];
+    @apply bg-gym-accent text-white font-bold uppercase tracking-wider px-7 py-3 rounded-full hover:bg-gym-accentHover transition-all duration-200 shadow-[0_4px_18px_rgba(239,35,60,0.4)];
   }
   .btn-secondary {
-    @apply bg-transparent border-2 border-gym-accent text-gym-accent font-semibold px-6 py-3 rounded-lg hover:bg-gym-accent hover:text-gym-darker transition-colors duration-200;
+    @apply bg-transparent border-2 border-gym-accent text-white font-bold uppercase tracking-wider px-7 py-3 rounded-full hover:bg-gym-accent hover:text-white transition-all duration-200;
   }
   .card {
-    @apply bg-gym-card border border-gym-border rounded-xl p-6 shadow-xl;
+    @apply bg-gym-card border border-gym-border/80 rounded-2xl p-6 shadow-xl;
   }
 }
+

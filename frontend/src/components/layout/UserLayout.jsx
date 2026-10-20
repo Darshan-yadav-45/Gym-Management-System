@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   Sparkles, 
-  Crown, 
-  Clock, 
   MessageSquare, 
   X, 
   Send, 
@@ -14,7 +12,11 @@ import {
   Activity,
   Home,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  Bot,
+  Users,
+  ShieldCheck,
+  Menu
 } from 'lucide-react';
 import { authService } from '../../services/authService';
 
@@ -22,15 +24,13 @@ export default function UserLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState(null);
-
-  // Discount countdown timer (starts around 04:25)
-  const [secondsLeft, setSecondsLeft] = useState(265); // 4m 25s
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // AI chat modal state
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [aiInput, setAiInput] = useState('');
   const [aiMessages, setAiMessages] = useState([
-    { role: 'assistant', text: 'Hi! I am FitAI Coach. How can I help power your workout today?' }
+    { role: 'assistant', text: 'Hi! I am FitFlow AI Coach. How can I help power your workout today?' }
   ]);
 
   useEffect(() => {
@@ -41,20 +41,6 @@ export default function UserLayout({ children }) {
       setUser(currentUser);
     }
   }, [navigate]);
-
-  // Real countdown timer
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 265));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const formatTimer = (totalSec) => {
-    const mins = Math.floor(totalSec / 60);
-    const secs = totalSec % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  };
 
   const handleAiSend = (e) => {
     e.preventDefault();
@@ -85,98 +71,97 @@ export default function UserLayout({ children }) {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#070A18] text-white flex items-center justify-center font-sans">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[#0b0c10] text-white flex items-center justify-center font-sans">
+        <div className="w-8 h-8 border-4 border-[#ef233c] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   // Active navigation checker
   const pathname = location.pathname;
-  const isHome = pathname === '/dashboard';
-  const isRoutines = pathname === '/dashboard/routines';
+  const isWebsiteHome = pathname === '/';
+  const isRoutines = pathname === '/dashboard/routines' || pathname === '/dashboard';
   const isExercises = pathname === '/dashboard/exercises';
   const isWorkout = pathname === '/dashboard/workout';
+  const isTrainers = pathname === '/trainers' || pathname.startsWith('/trainers/');
   const isRecover = pathname === '/dashboard/recover';
-  const isAccount = pathname === '/dashboard/account';
+  const isAccount = pathname === '/dashboard/account' || pathname === '/profile';
 
   const navLinks = [
-    { name: 'Home', path: '/dashboard', icon: Home, active: isHome },
+    { name: 'Home', path: '/', icon: Home, active: isWebsiteHome },
     { name: 'Routines', path: '/dashboard/routines', icon: ListChecks, active: isRoutines },
     { name: 'Exercises', path: '/dashboard/exercises', icon: Activity, active: isExercises },
     { name: 'Workout', path: '/dashboard/workout', icon: Dumbbell, active: isWorkout },
+    { name: 'Coaches', path: '/trainers', icon: Users, active: isTrainers },
     { name: 'Recover', path: '/dashboard/recover', icon: RotateCcw, active: isRecover },
     { name: 'Account', path: '/dashboard/account', icon: UserIcon, active: isAccount },
   ];
 
   return (
-    <div className="min-h-screen bg-[#060913] text-white font-sans flex flex-col selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-[#0b0c10] text-gray-200 font-sans flex flex-col selection:bg-[#ef233c] selection:text-white">
       
       {/* ======================================================== */}
-      {/* TOP FULL-WIDTH HEADER / NAVBAR                           */}
+      {/* TOP HEADER / NAVBAR (Matching Screenshot 2)              */}
       {/* ======================================================== */}
-      <header className="w-full bg-[#080B1A]/95 backdrop-blur-md border-b border-white/10 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+      <header className="w-full bg-[#14151b]/95 backdrop-blur-md border-b border-white/5 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-2 sm:gap-4">
           
-          {/* Left: FitAI Branding */}
-          <Link to="/dashboard" className="flex items-center gap-2 group cursor-pointer">
-            <span className="text-2xl sm:text-3xl font-black tracking-tight text-white group-hover:opacity-90 transition-opacity">
-              Fit<span className="text-[#00A3FF]">AI</span>
+          {/* Left: FitFlow Branding */}
+          <Link to="/" className="flex items-center gap-1 group cursor-pointer shrink-0">
+            <span className="text-2xl sm:text-3xl font-black font-display tracking-[0.15em] text-white group-hover:opacity-90 transition-opacity">
+              FIT<span className="text-[#ef233c] font-black italic">FLOW</span>
             </span>
           </Link>
 
-          {/* Center: Desktop Navigation Bar Links */}
-          <nav className="hidden md:flex items-center gap-1.5 bg-[#101429] p-1.5 rounded-2xl border border-white/5 shadow-inner">
-            {navLinks.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => navigate(item.path)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                    item.active
-                      ? 'bg-[#18234D] text-[#00A3FF] shadow-sm'
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.name}</span>
-                </button>
-              );
-            })}
-          </nav>
+          {/* Center: Desktop Navigation Bar Links in Rounded Dark Container */}
+          <div className="hidden md:flex flex-1 justify-center mx-2 lg:mx-4">
+            <nav className="flex items-center gap-1 bg-[#121318] p-1.5 rounded-full border border-white/10 shadow-[0_4px_25px_rgba(0,0,0,0.5)]">
+              {navLinks.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => navigate(item.path)}
+                    className={`flex items-center gap-2 px-3.5 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                      item.active
+                        ? 'bg-[#ef233c] text-white shadow-[0_0_16px_rgba(239,35,60,0.55)]'
+                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{item.name}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
 
-          {/* Right Controls: Timer, Try For Free, User Avatar & Logout */}
-          <div className="flex items-center gap-3">
-            {/* Desktop Discount Badge */}
-            <div className="hidden lg:flex items-center gap-2 bg-[#00D632]/10 border border-[#00D632]/30 text-[#00D632] px-3 py-1.5 rounded-full text-xs font-bold">
-              <Clock className="w-3.5 h-3.5" />
-              <span>80% off:</span>
-              <span className="font-mono bg-[#00D632] text-black px-1.5 py-0.5 rounded text-[11px] font-black">
-                {formatTimer(secondsLeft)}
-              </span>
-            </div>
+          {/* Right Controls: User Avatar, Admin Badge & Logout */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
 
-            {/* TRY FOR FREE Badge */}
-            <button
-              onClick={() => alert("You're currently enjoying the FitAI Pro preview!")}
-              className="bg-[#00D632] hover:bg-[#00c02c] text-[#071307] font-black text-xs px-3.5 py-1.5 rounded-full flex items-center gap-1.5 tracking-wider uppercase shadow-[0_0_15px_rgba(0,214,50,0.35)] transition-all transform active:scale-95"
-            >
-              <span className="hidden sm:inline">TRY FOR FREE</span>
-              <span className="sm:hidden">PRO</span>
-              <Crown className="w-3.5 h-3.5 fill-[#071307] text-[#071307]" />
-            </button>
+            {/* Admin Console Link for Admins */}
+            {user?.role === 'ADMIN' && (
+              <Link
+                to="/admin"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/20 text-[#ef233c] hover:bg-red-500/30 border border-[#ef233c]/40 text-xs font-black uppercase tracking-wider transition-all shadow-[0_0_12px_rgba(239,35,60,0.3)]"
+                title="Open FitFlow Admin Console"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-[#ef233c]" />
+                <span className="hidden sm:inline">Admin</span>
+              </Link>
+            )}
 
             {/* User Profile Avatar Link */}
             <Link
               to="/dashboard/account"
               className="flex items-center gap-2 pl-2 border-l border-white/10 group cursor-pointer"
+              title="View Account Profile"
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#00A3FF] to-[#6366F1] flex items-center justify-center text-xs font-black text-white group-hover:scale-105 transition-transform">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#ef233c] to-[#d90429] flex items-center justify-center text-xs font-black text-white group-hover:scale-105 transition-transform shadow-[0_2px_10px_rgba(239,35,60,0.3)]">
                 {user?.name?.charAt(0).toUpperCase() || 'U'}
               </div>
               <span className="hidden xl:inline text-xs font-bold text-gray-200 group-hover:text-white">
-                {user?.name?.split(' ')[0]}
+                {user?.name?.split(' ')[0] || 'Athlete'}
               </span>
             </Link>
 
@@ -184,12 +169,58 @@ export default function UserLayout({ children }) {
             <button
               onClick={handleSignOut}
               title="Sign Out"
-              className="hidden sm:flex p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+              className="p-1.5 text-gray-400 hover:text-[#ef233c] hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+              aria-label="Logout"
             >
               <LogOut className="w-4 h-4" />
             </button>
+
+            {/* Mobile Menu Hamburger */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-1.5 text-gray-400 hover:text-white focus:outline-none"
+              aria-label="Toggle mobile menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5 text-[#ef233c]" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Header Menu Drawer */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-[#121318]/98 backdrop-blur-xl border-b border-white/10 px-4 py-4 space-y-2 text-xs font-bold uppercase tracking-wider shadow-2xl animate-in slide-in-from-top-2 duration-200">
+            {navLinks.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.name}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigate(item.path);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${
+                    item.active
+                      ? 'bg-[#ef233c] text-white shadow-md'
+                      : 'text-gray-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.name}</span>
+                </button>
+              );
+            })}
+            <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+              <span className="text-gray-400 text-xs">{user?.name}</span>
+              <button
+                onClick={handleSignOut}
+                className="text-[#ef233c] text-xs font-bold uppercase flex items-center gap-1.5"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ======================================================== */}
@@ -200,25 +231,13 @@ export default function UserLayout({ children }) {
       </main>
 
       {/* ======================================================== */}
-      {/* FLOATING ACTION BUTTONS (COUNTDOWN & AI ASSISTANT)       */}
+      {/* FLOATING ACTION BUTTON (AI ASSISTANT)                    */}
       {/* ======================================================== */}
       <div className="fixed bottom-24 md:bottom-8 right-5 z-40 flex flex-col items-end gap-3 pointer-events-auto">
-        {/* Mobile-only Discount pill badge */}
-        <div className="lg:hidden bg-[#00D632] text-[#071307] px-3.5 py-1.5 rounded-full shadow-[0_4px_20px_rgba(0,214,50,0.45)] flex items-center gap-2 font-black text-xs tracking-tight border border-[#52ff7d] animate-pulse">
-          <div className="bg-white rounded-full p-0.5">
-            <Clock className="w-3.5 h-3.5 text-[#00D632]" />
-          </div>
-          <span>80% discount!</span>
-          <span className="text-white bg-black/80 px-2 py-0.5 rounded-full text-xs font-mono font-bold tracking-widest">
-            {formatTimer(secondsLeft)}
-          </span>
-        </div>
-
-        {/* Circular AI Assistant FAB */}
         <button
           onClick={() => setIsAiOpen(true)}
-          title="Chat with FitAI Coach"
-          className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#00A3FF] via-[#6366F1] to-[#C084FC] p-3 shadow-[0_4px_30px_rgba(99,102,241,0.6)] flex items-center justify-center text-white hover:scale-110 active:scale-95 transition-transform"
+          title="Chat with FitFlow AI Coach"
+          className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#ef233c] to-[#b7094c] p-3 shadow-[0_4px_25px_rgba(239,35,60,0.5)] flex items-center justify-center text-white hover:scale-110 active:scale-95 transition-transform cursor-pointer"
         >
           <Sparkles className="w-7 h-7 fill-white" />
         </button>
@@ -227,91 +246,43 @@ export default function UserLayout({ children }) {
       {/* ======================================================== */}
       {/* MOBILE BOTTOM NAVIGATION BAR (SHOWN ON MOBILE ONLY)       */}
       {/* ======================================================== */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-gradient-to-t from-black via-[#080B1A] to-[#080B1A]/95 backdrop-blur-xl border-t border-white/5">
-        <div className="w-full flex items-center justify-around py-2 px-2">
-          
-          {/* 1. Routines */}
-          <button
-            onClick={() => navigate('/dashboard/routines')}
-            className={`flex flex-col items-center justify-center transition-colors min-w-[56px] py-1 ${
-              isRoutines ? 'text-[#00A3FF]' : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            <div className={`p-1.5 rounded-full ${isRoutines ? 'bg-[#18234D] px-4' : ''}`}>
-              <ListChecks className="w-5 h-5" />
-            </div>
-            <span className="text-[11px] font-semibold mt-0.5">Routines</span>
-          </button>
-
-          {/* 2. Exercises */}
-          <button
-            onClick={() => navigate('/dashboard/exercises')}
-            className={`flex flex-col items-center justify-center transition-colors min-w-[56px] py-1 ${
-              isExercises ? 'text-[#00A3FF]' : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            <div className={`p-1.5 rounded-full ${isExercises ? 'bg-[#18234D] px-4' : ''}`}>
-              <Activity className="w-5 h-5" />
-            </div>
-            <span className="text-[11px] font-semibold mt-0.5">Exercises</span>
-          </button>
-
-          {/* 3. Workout */}
-          <button
-            onClick={() => navigate('/dashboard/workout')}
-            className={`flex flex-col items-center justify-center transition-colors min-w-[56px] py-1 ${
-              isWorkout ? 'text-[#00A3FF]' : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            <div className={`p-1.5 rounded-full ${isWorkout ? 'bg-[#18234D] px-4' : ''}`}>
-              <Dumbbell className="w-5 h-5" />
-            </div>
-            <span className="text-[11px] font-semibold mt-0.5">Workout</span>
-          </button>
-
-          {/* 4. Recover */}
-          <button
-            onClick={() => navigate('/dashboard/recover')}
-            className={`flex flex-col items-center justify-center transition-colors min-w-[56px] py-1 ${
-              isRecover ? 'text-[#00A3FF]' : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            <div className={`p-1.5 rounded-full ${isRecover ? 'bg-[#18234D] px-4' : ''}`}>
-              <RotateCcw className="w-5 h-5" />
-            </div>
-            <span className="text-[11px] font-semibold mt-0.5">Recover</span>
-          </button>
-
-          {/* 5. Account */}
-          <button
-            onClick={() => navigate('/dashboard/account')}
-            className={`flex flex-col items-center justify-center transition-colors min-w-[56px] py-1 ${
-              isAccount ? 'text-[#00A3FF]' : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            <div className={`p-1.5 rounded-full ${isAccount ? 'bg-[#18234D] px-4' : ''}`}>
-              <UserIcon className="w-5 h-5" />
-            </div>
-            <span className="text-[11px] font-semibold mt-0.5">Account</span>
-          </button>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-[#14151b]/98 backdrop-blur-xl border-t border-white/10 shadow-2xl">
+        <div className="w-full flex items-center justify-around py-1.5 px-1 overflow-x-auto no-scrollbar">
+          {navLinks.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.name}
+                onClick={() => navigate(item.path)}
+                className={`flex flex-col items-center justify-center transition-colors min-w-[44px] py-1 px-1.5 rounded-xl cursor-pointer ${
+                  item.active ? 'text-[#ef233c]' : 'text-gray-400 hover:text-gray-200'
+                }`}
+              >
+                <div className={`p-1 rounded-full ${item.active ? 'bg-[#ef233c]/15 px-2.5' : ''}`}>
+                  <Icon className="w-4 h-4" />
+                </div>
+                <span className="text-[9px] font-bold mt-0.5 tracking-tight">{item.name}</span>
+              </button>
+            );
+          })}
         </div>
       </nav>
 
       {/* ======================================================== */}
-      {/* FITAI ASSISTANT DIALOG                                    */}
+      {/* FITFLOW AI ASSISTANT DIALOG                               */}
       {/* ======================================================== */}
       {isAiOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-          <div className="bg-[#12162B] border border-blue-500/30 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+          <div className="bg-[#14151b] border border-white/10 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
             {/* Header */}
-            <div className="p-4 bg-[#191E3B] border-b border-white/10 flex items-center justify-between">
+            <div className="p-4 bg-[#181920] border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#00A3FF] to-[#A855F7] flex items-center justify-center">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#ef233c] to-[#b7094c] flex items-center justify-center shadow-md">
                   <Sparkles className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">FitAI Coach Assistant</h3>
-                  <p className="text-[11px] text-green-400">● Online & Ready</p>
+                  <h3 className="text-sm font-bold font-display uppercase tracking-wide text-white">FitFlow AI Coach</h3>
+                  <p className="text-[11px] text-emerald-400 font-semibold">● Active & Ready</p>
                 </div>
               </div>
               <button
@@ -332,8 +303,8 @@ export default function UserLayout({ children }) {
                   <div
                     className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed ${
                       msg.role === 'user'
-                        ? 'bg-blue-600 text-white rounded-br-sm'
-                        : 'bg-[#1D2344] text-gray-200 border border-white/5 rounded-bl-sm'
+                        ? 'bg-[#ef233c] text-white rounded-br-sm shadow-md font-medium'
+                        : 'bg-[#181920] text-gray-200 border border-white/5 rounded-bl-sm'
                     }`}
                   >
                     {msg.text}
@@ -343,17 +314,17 @@ export default function UserLayout({ children }) {
             </div>
 
             {/* Input */}
-            <form onSubmit={handleAiSend} className="p-3 border-t border-white/10 bg-[#151933] flex gap-2">
+            <form onSubmit={handleAiSend} className="p-3 border-t border-white/5 bg-[#181920] flex gap-2">
               <input
                 type="text"
                 value={aiInput}
                 onChange={(e) => setAiInput(e.target.value)}
-                placeholder="Ask FitAI about exercises, form, hydration..."
-                className="flex-1 bg-[#0D1022] text-white text-xs sm:text-sm px-4 py-2.5 rounded-xl border border-white/10 focus:outline-none focus:border-blue-500"
+                placeholder="Ask FitFlow AI about exercises, form, hydration..."
+                className="flex-1 bg-[#101116] text-white text-xs sm:text-sm px-4 py-2.5 rounded-full border border-white/10 focus:outline-none focus:border-[#ef233c]"
               />
               <button
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1 transition-colors"
+                className="bg-[#ef233c] hover:bg-[#d90429] text-white px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-1 transition-colors shadow-[0_2px_12px_rgba(239,35,60,0.4)] cursor-pointer"
               >
                 <Send className="w-4 h-4" />
               </button>

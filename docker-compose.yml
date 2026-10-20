@@ -1,0 +1,69 @@
+services:
+  # ── PostgreSQL Database ───────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: fitflow-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: fitflow
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Appu@1234}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fitflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fitflow-network
+
+  # ── FitFlow Spring Boot Backend ───────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fitflow-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/fitflow
+      SPRING_DATASOURCE_USERNAME: postgres
+      DB_PASSWORD: ${DB_PASSWORD:-Appu@1234}
+      JWT_SECRET: ${JWT_SECRET:-94a08da1fecbb6e8b46990538c7b50b2b800531bb8999a3845b4618e47854611}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-FitFlow}
+      SMTP_ENABLED: ${SMTP_ENABLED:-false}
+    ports:
+      - "8080:8080"
+    networks:
+      - fitflow-network
+
+  # ── FitFlow React Frontend (Nginx) ────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: fitflow-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - fitflow-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  fitflow-network:
+    driver: bridge

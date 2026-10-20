@@ -17,6 +17,9 @@ import Trainers from './pages/Trainers';
 import TrainerProfile from './pages/TrainerProfile';
 import TrainerLogin from './pages/TrainerLogin';
 import Programs from './pages/Programs';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/AdminLogin';
+import TrainerCareersPage from './pages/TrainerCareersPage';
 
 function App() {
   return (
@@ -29,7 +32,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         
         {/* Authenticated Dashboard Pages */}
-        <Route path="/dashboard" element={<DashboardHome />} />
+        <Route path="/dashboard" element={<Navigate to="/dashboard/routines" replace />} />
+        <Route path="/dashboard/home" element={<DashboardHome />} />
         <Route path="/dashboard/exercises" element={<ExercisesPage />} />
         <Route path="/dashboard/workout" element={<WorkoutPage />} />
         <Route path="/dashboard/account" element={<AccountPage />} />
@@ -41,8 +45,18 @@ function App() {
         <Route path="/trainers" element={<Trainers />} />
         <Route path="/trainers/:id" element={<TrainerProfile />} />
         <Route path="/trainer/login" element={<TrainerLogin />} />
+        
+        {/* Admin Dashboard, Admin Login & DB Explorer */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/db" element={<DatabaseViewer />} />
+        
         <Route path="/programs" element={<Programs />} />
+        
+        {/* Careers & Trainer Opportunities */}
+        <Route path="/careers" element={<Navigate to="/careers/trainers" replace />} />
+        <Route path="/careers/trainers" element={<TrainerCareersPage />} />
         
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />

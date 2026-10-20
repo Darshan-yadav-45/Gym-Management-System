@@ -1,183 +1,736 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { coachService } from '../services/coachService';
 import { trainerService } from '../services/trainerService';
-import { ChevronRight, ArrowRight } from 'lucide-react';
+import { authService } from '../services/authService';
+import { 
+  Bot, 
+  Sparkles, 
+  CheckCircle2, 
+  Lock, 
+  ShieldCheck, 
+  UserCheck, 
+  Flame, 
+  Zap, 
+  Award, 
+  Filter, 
+  Check, 
+  ArrowRight, 
+  Crown, 
+  Dumbbell, 
+  HeartHandshake, 
+  Users,
+  Compass,
+  AlertCircle
+} from 'lucide-react';
 
 export default function Trainers() {
-    const [trainers, setTrainers] = useState([]);
-    const [filter, setFilter] = useState('All');
-    const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(null);
+  const [activeTab, setActiveTab] = useState('ai'); // 'ai' | 'human'
+  const [coaches, setCoaches] = useState([]);
+  const [humanTrainers, setHumanTrainers] = useState([]);
+  const [myCoach, setMyCoach] = useState(null);
+  const [subscription, setSubscription] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSelecting, setIsSelecting] = useState(null);
+  const [toastMessage, setToastMessage] = useState(null);
 
-    const specializations = ['All', 'Muscle Building', 'Weight Loss', 'Strength', 'Sports', 'Yoga'];
+  // Filters
+  const [selectedGender, setSelectedGender] = useState('ALL');
+  const [selectedTier, setSelectedTier] = useState('ALL');
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [premiumModalCoach, setPremiumModalCoach] = useState(null);
 
-    useEffect(() => {
-        const fetchTrainers = async () => {
-            try {
-                const data = await trainerService.getAllTrainers();
-                setTrainers(data);
-            } catch (error) {
-                console.error("Failed to load trainers");
-                setTrainers([
-                    { id: 1, name: 'ARJUN SHARMA', specialization: 'Strength,Muscle Building,Gym Training', experienceYears: 8, profileImageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=500' },
-                    { id: 2, name: 'PRIYA MENON', specialization: 'Fat Loss,HIIT,Nutrition', experienceYears: 6, profileImageUrl: 'https://images.unsplash.com/photo-1548690312-e3b507d8c110?q=80&w=500' },
-                    { id: 3, name: 'RAHUL KUMAR', specialization: 'Sports,Conditioning,Performance', experienceYears: 7, profileImageUrl: 'https://images.openai.com/static-rsc-4/QPY6yYz3r1Z-oEQtvG4Auiplb1sxvhKwapu27CnoiMopGoYAcwpYVpbFuL3H6LVCjwzfaL0yoFGoAE21PLHL5Wu-iRieZq3dRy7AjKTaFUIb1Jj3rzT3eivXxe2mP9CJkQV0IYh00fdz01lv9PJ8SF8pLlxpqxYcXbdUcFRkBqmfydke9XAifvhXtto5xWFo?purpose=fullsize' },
-                ]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchTrainers();
-    }, []);
+  const categories = [
+    { key: 'ALL', label: 'All Disciplines' },
+    { key: 'WEIGHT_LOSS', label: 'Weight Loss & Fat Burn' },
+    { key: 'WEIGHT_GAIN', label: 'Weight Gain & Muscle' },
+    { key: 'STRENGTH_TRAINING', label: 'Strength & Power' },
+    { key: 'YOGA_FLEXIBILITY', label: 'Yoga & Flexibility' },
+    { key: 'SPORTS_CONDITIONING', label: 'Sports Conditioning' },
+    { key: 'RECOVERY_STRETCHING', label: 'Recovery & Mobility' },
+    { key: 'HOME_WORKOUTS', label: 'Home & Bodyweight' },
+    { key: 'CARDIO_ENDURANCE', label: 'Cardio & VO2 Max' },
+    { key: 'GENERAL_FITNESS', label: 'General Fitness' }
+  ];
 
-    const filteredTrainers = filter === 'All' 
-        ? trainers 
-        : trainers.filter(t => t.specialization?.includes(filter) || t.tags?.includes(filter));
+  const defaultHumanTrainers = [
+    { 
+      id: 1, 
+      name: 'ARJUN SHARMA', 
+      specialization: 'Strength, Muscle Building, Heavy Barbell Technique', 
+      experienceYears: 8, 
+      profileImageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=500',
+      tags: ['Strength', 'Muscle Building', 'Bodybuilding'],
+      bio: 'Former national powerlifter specializing in joint-friendly hypertrophy and peak strength periodization.'
+    },
+    { 
+      id: 2, 
+      name: 'PRIYA MENON', 
+      specialization: 'Weight Loss, Metabolic Conditioning, Sports Nutrition', 
+      experienceYears: 6, 
+      profileImageUrl: 'https://images.unsplash.com/photo-1548690312-e3b507d8c110?q=80&w=500',
+      tags: ['Fat Loss', 'HIIT', 'Nutrition'],
+      bio: 'Certified strength and conditioning coach focused on metabolic conditioning and holistic female athletic development.'
+    },
+    { 
+      id: 3, 
+      name: 'RAHUL KUMAR', 
+      specialization: 'Sports Performance, Plyometrics, Agility & Speed', 
+      experienceYears: 7, 
+      profileImageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500',
+      tags: ['Sports', 'Agility', 'Conditioning'],
+      bio: 'Prepares collegiate athletes and competitive fighters with sport-specific power and sprint acceleration.'
+    }
+  ];
 
-    return (
-        <div className="min-h-screen bg-[#060913] text-white font-sans overflow-x-hidden">
-            {/* Navbar (Mocked for context, usually imported) */}
-            <nav className="flex justify-between items-center p-6 md:px-12 absolute top-0 w-full z-50">
-                <Link to="/" className="text-2xl font-black font-display tracking-[0.2em] text-white">
-                    FIT<span className="text-gym-accent">FLOW</span>
-                </Link>
-                <div className="hidden md:flex gap-8 text-sm font-bold tracking-widest uppercase">
-                    <Link to="/" className="hover:text-gym-accent transition-colors">Home</Link>
-                    <Link to="/programs" className="hover:text-gym-accent transition-colors">Programs</Link>
-                    <Link to="/trainers" className="text-gym-accent">Trainers</Link>
-                    <Link to="/login" className="hover:text-gym-accent transition-colors">Login</Link>
-                    <Link to="/register" className="text-gym-accent border border-gym-accent px-4 py-2 hover:bg-gym-accent hover:text-white transition-all">Join Now</Link>
-                </div>
-            </nav>
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+    setCurrentUser(user);
 
-            {/* Hero Section */}
-            <div className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 md:px-12 flex flex-col md:flex-row items-center">
-                <div className="md:w-1/2 z-10">
-                    <h1 className="text-6xl md:text-8xl font-black font-display uppercase tracking-tighter leading-[0.9] mb-6">
-                        MEET YOUR<br/>
-                        <span className="text-gym-accent text-transparent bg-clip-text bg-gradient-to-r from-gym-accent to-red-600">TRAINERS.</span>
-                    </h1>
-                    <p className="text-gray-400 text-lg md:text-xl max-w-md mb-10 font-medium">
-                        Expert guidance. Personalized programs. Real results.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <button className="bg-gym-accent text-white px-8 py-4 uppercase font-bold tracking-widest text-sm hover:bg-white hover:text-black transition-colors flex items-center justify-center gap-2">
-                            FIND YOUR TRAINER <ArrowRight className="w-4 h-4"/>
-                        </button>
-                        <button className="bg-transparent border border-white/20 text-white px-8 py-4 uppercase font-bold tracking-widest text-sm hover:border-white transition-colors">
-                            VIEW PROGRAMS
-                        </button>
-                    </div>
-                </div>
-                <div className="md:w-1/2 mt-12 md:mt-0 relative">
-                    {/* Decorative elements */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gym-accent/20 blur-[120px] rounded-full z-0"></div>
-                    <img 
-                        src="https://images.openai.com/static-rsc-4/CDxVtxew9TjGo_zcBHhmugptfGYvLiARUkPUPGertdHdmIKoVn6LgBisI9KfQTVrYmGms02MAry9z-XdpBPUOoqdipebond-s4zHLUM05j3WvjzjFXaXaANpDGywiKxh6PMA8G5WvLMNBAfF7CvZp6NAtHvRTSG1EVw5yEGSxXn1wskTGZ7yfL9VfRrGDMea?purpose=fullsize" 
-                        alt="FitFlow Trainer" 
-                        className="relative z-10 w-full h-[500px] object-cover object-top rounded-bl-[100px] rounded-tr-[100px] shadow-2xl grayscale contrast-125 border-r-4 border-b-4 border-gym-accent"
-                    />
-                </div>
-            </div>
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        // Load AI Coaches
+        const aiData = await coachService.getAllCoaches();
+        setCoaches(aiData || []);
 
-            {/* Filters */}
-            <div className="px-6 md:px-12 py-12 border-t border-white/10 bg-[#0A0D18]">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
-                    <div>
-                        <h3 className="text-sm uppercase tracking-widest font-bold text-gray-400 mb-4">Specialization</h3>
-                        <div className="flex flex-wrap gap-3">
-                            {specializations.map(spec => (
-                                <button 
-                                    key={spec}
-                                    onClick={() => setFilter(spec)}
-                                    className={`px-5 py-2 uppercase text-xs font-bold tracking-widest transition-all ${
-                                        filter === spec 
-                                        ? 'bg-gym-accent text-white' 
-                                        : 'bg-transparent border border-white/20 text-gray-400 hover:border-white hover:text-white'
-                                    }`}
-                                >
-                                    {spec}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
+        // Load Human Trainers
+        try {
+          const humanData = await trainerService.getAllTrainers();
+          if (humanData && humanData.length > 0) {
+            setHumanTrainers(humanData);
+          } else {
+            setHumanTrainers(defaultHumanTrainers);
+          }
+        } catch {
+          setHumanTrainers(defaultHumanTrainers);
+        }
 
-                {/* Trainer Grid */}
-                {isLoading ? (
-                    <div className="text-center py-20 text-gym-accent font-bold tracking-widest uppercase">Loading Trainers...</div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {filteredTrainers.map((trainer) => (
-                            <div key={trainer.id} className="bg-[#151A2C] border border-white/5 hover:border-gym-accent/50 transition-colors group relative overflow-hidden flex flex-col">
-                                <div className="absolute top-0 right-0 w-24 h-24 bg-gym-accent/10 rounded-bl-full pointer-events-none transform group-hover:scale-150 transition-transform duration-500 z-10"></div>
-                                <div className="h-48 w-full overflow-hidden relative">
-                                    <img src={trainer.profileImageUrl || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=500'} alt={trainer.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#151A2C] to-transparent"></div>
-                                </div>
-                                <div className="p-8 pt-4 flex-grow flex flex-col">
-                                    <h3 className="text-2xl font-black font-display uppercase tracking-widest mb-1 relative z-20">{trainer.name}</h3>
-                                    <p className="text-gym-accent text-sm font-bold uppercase tracking-widest mb-4">
-                                        {trainer.specialization?.split(',')[0] || 'Fitness Expert'}
-                                    </p>
-                                    
-                                    <div className="mb-6 flex-grow">
-                                        <span className="text-xs bg-white/5 px-3 py-1 text-gray-300 font-medium">
-                                            {trainer.experienceYears}+ Years Experience
-                                        </span>
-                                    </div>
+        // If authenticated, get user's selected coach and subscription
+        if (user) {
+          try {
+            const activeCoach = await coachService.getMyCoach();
+            setMyCoach(activeCoach);
+          } catch (err) {
+            console.warn("No active coach preference yet", err);
+          }
 
-                                    <div className="flex flex-wrap gap-2 mb-8">
-                                        {(trainer.tags || trainer.specialization?.split(',')).slice(0,3).map(tag => (
-                                            <span key={tag} className="text-xs text-gray-400 uppercase tracking-wider before:content-['•'] before:mr-1 before:text-gym-accent">
-                                                {tag.trim()}
-                                            </span>
-                                        ))}
-                                    </div>
+          try {
+            const sub = await coachService.getMySubscription();
+            setSubscription(sub);
+          } catch (err) {
+            console.warn("Could not fetch subscription", err);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load coaches/trainers:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-                                    <Link 
-                                        to={`/trainers/${trainer.id}`}
-                                        className="inline-flex items-center gap-2 text-sm uppercase tracking-widest font-bold text-white group-hover:text-gym-accent transition-colors mt-auto"
-                                    >
-                                        View Profile <ArrowRight className="w-4 h-4 transform group-hover:translate-x-2 transition-transform"/>
-                                    </Link>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+    loadData();
+  }, []);
 
-            {/* Why Train Section */}
-            <div className="py-24 px-6 md:px-12">
-                <div className="text-center mb-16">
-                    <h2 className="text-5xl md:text-6xl font-black font-display uppercase tracking-tighter leading-none mb-4">
-                        MORE THAN A WORKOUT.<br/>
-                        <span className="text-gym-accent">IT'S COACHING.</span>
-                    </h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    {[
-                        { num: '01', title: 'PERSONALIZED', desc: 'Training based on your body, goals and experience.' },
-                        { num: '02', title: 'EXPERT GUIDANCE', desc: 'Learn proper form and technique from professionals.' },
-                        { num: '03', title: 'PROGRESS TRACKING', desc: 'Your trainer monitors your progress and adapts.' },
-                        { num: '04', title: 'ACCOUNTABILITY', desc: 'Stay consistent with scheduled one-on-one sessions.' }
-                    ].map(item => (
-                        <div key={item.num} className="border-l-2 border-gym-accent/30 pl-6 hover:border-gym-accent transition-colors">
-                            <span className="text-gym-accent font-black text-2xl block mb-2">{item.num}</span>
-                            <h3 className="text-lg font-bold uppercase tracking-widest mb-2">{item.title}</h3>
-                            <p className="text-gray-400 text-sm leading-relaxed">{item.desc}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
 
-            {/* Footer Additions */}
-            <div className="border-t border-white/10 bg-black py-12 px-6 md:px-12 text-center">
-                <p className="text-gray-400 text-sm font-bold uppercase tracking-widest mb-4">Are you a FitFlow Trainer?</p>
-                <Link to="/trainer/login" className="text-gym-accent hover:text-white font-bold tracking-[0.2em] uppercase text-sm inline-flex items-center gap-2 transition-colors">
-                    TRAINER LOGIN <ChevronRight className="w-4 h-4"/>
-                </Link>
-            </div>
+  const handleSelectCoach = async (coach) => {
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    if (coach.tier === 'PREMIUM' && !subscription?.isPremiumActive) {
+      setPremiumModalCoach(coach);
+      setShowPremiumModal(true);
+      return;
+    }
+
+    setIsSelecting(coach.id);
+    try {
+      const selected = await coachService.selectCoach(coach.id);
+      setMyCoach(selected);
+      // Update coaches list selected flag
+      setCoaches(prev => prev.map(c => ({
+        ...c,
+        selected: c.id === coach.id
+      })));
+      showToast(`Coach ${coach.displayName} is now your active AI coach!`);
+    } catch (err) {
+      console.error("Failed to select coach", err);
+      const errMsg = err.response?.data?.message || "Failed to set coach preference.";
+      showToast(errMsg);
+    } finally {
+      setIsSelecting(null);
+    }
+  };
+
+  // Filter AI Coaches
+  const filteredCoaches = coaches.filter(c => {
+    // Gender filter
+    if (selectedGender !== 'ALL' && c.gender?.toUpperCase() !== selectedGender) {
+      return false;
+    }
+    // Tier filter
+    if (selectedTier !== 'ALL' && c.tier?.toUpperCase() !== selectedTier) {
+      return false;
+    }
+    // Category filter
+    if (selectedCategory !== 'ALL') {
+      const matchesPrimary = c.primaryCategory === selectedCategory;
+      const matchesSupported = c.supportedCategories?.includes(selectedCategory);
+      if (!matchesPrimary && !matchesSupported) return false;
+    }
+    return true;
+  });
+
+  return (
+    <div className="min-h-screen bg-[#0b0c10] text-gray-200 font-sans selection:bg-[#ef233c] selection:text-white">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-20 right-6 z-50 bg-[#ef233c] text-white px-5 py-3 rounded-xl shadow-2xl font-bold text-xs uppercase tracking-wider flex items-center gap-2 animate-in slide-in-from-top-4 duration-200">
+          <CheckCircle2 className="w-4 h-4" />
+          <span>{toastMessage}</span>
         </div>
-    );
+      )}
+
+      {/* Navigation */}
+      <header className="sticky top-0 z-50 bg-[#0b0c10]/95 backdrop-blur-md border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4 flex justify-between items-center">
+          <Link to="/" className="flex items-center text-2xl sm:text-3xl font-black font-display tracking-[0.15em] text-white">
+            FIT<span className="text-[#ef233c] font-black italic">FLOW</span>
+          </Link>
+          <div className="hidden md:flex gap-9 text-xs font-bold tracking-widest uppercase text-gray-300">
+            <Link to="/" className="hover:text-[#ef233c] transition-colors">Home</Link>
+            <Link to="/dashboard/routines" className="hover:text-[#ef233c] transition-colors">Dashboard</Link>
+            <Link to="/dashboard/exercises" className="hover:text-[#ef233c] transition-colors">Exercises</Link>
+            <Link to="/dashboard/workout" className="hover:text-[#ef233c] transition-colors">Workout</Link>
+            <Link to="/trainers" className="text-[#ef233c] transition-colors">Coaches & Trainers</Link>
+          </div>
+          <div className="flex items-center gap-3">
+            {currentUser ? (
+              <Link 
+                to="/dashboard/workout" 
+                className="bg-[#ef233c] hover:bg-[#d90429] text-white px-5 py-2 rounded-full font-bold uppercase tracking-wider text-xs transition-all shadow-[0_4px_16px_rgba(239,35,60,0.35)] flex items-center gap-1.5"
+              >
+                <Dumbbell className="w-3.5 h-3.5" />
+                <span>Go to Workout</span>
+              </Link>
+            ) : (
+              <Link 
+                to="/login" 
+                className="bg-[#ef233c] hover:bg-[#d90429] text-white px-6 py-2.5 rounded font-bold uppercase tracking-widest text-xs transition-all shadow-[0_4px_16px_rgba(239,35,60,0.35)]"
+              >
+                JOIN NOW
+              </Link>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section with Full Background Image */}
+      <section className="relative pt-16 pb-16 overflow-hidden border-b border-white/5">
+        {/* Full Section Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-45 scale-105"
+          style={{ 
+            backgroundImage: "url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2000&auto=format&fit=crop')" 
+          }}
+        ></div>
+
+        {/* Ambient gradients for high text contrast while letting the gym background shine through */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0b0c10] via-[#0b0c10]/90 to-[#0b0c10]/35"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0c10] via-transparent to-[#0b0c10]/80"></div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ef233c]/10 border border-[#ef233c]/30 text-[#ef233c] text-xs font-bold uppercase tracking-widest mb-4">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Adaptive Intelligence & Elite Coaching</span>
+            </div>
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-display uppercase tracking-tight leading-[0.95] mb-6 text-white">
+              SELECT YOUR<br/>
+              <span className="text-[#ef233c]">FITFLOW COACH.</span>
+            </h1>
+            <p className="text-gray-300 text-sm sm:text-base max-w-xl mb-6 leading-relaxed">
+              Choose from 14 specialized AI Coaches (Male & Female, Free & Premium) engineered for weight loss, hypertrophy, powerlifting, yoga, and athletic conditioning. Your selected coach guides your daily workouts with tailored cues and motivation.
+            </p>
+
+            {/* Feature Highlights Pills */}
+            <div className="flex flex-wrap items-center gap-3 mb-8">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-cyan-400 bg-cyan-950/60 border border-cyan-500/30 px-3.5 py-1.5 rounded-full backdrop-blur-sm">
+                <Sparkles className="w-3.5 h-3.5" /> Real-time Biomechanics
+              </span>
+              <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-3.5 py-1.5 rounded-full backdrop-blur-sm">
+                <Zap className="w-3.5 h-3.5" /> 24/7 Availability
+              </span>
+            </div>
+
+            {/* Currently Active Coach Banner */}
+            {myCoach ? (
+              <div className="p-4 rounded-2xl bg-[#14151b]/90 backdrop-blur-md border border-emerald-500/30 flex items-center justify-between gap-4 max-w-lg mb-6 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+                <div className="flex items-center gap-3">
+                  <img 
+                    src={myCoach.avatarUrl} 
+                    alt={myCoach.displayName} 
+                    className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500 shadow-md"
+                  />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white font-black uppercase text-sm tracking-wide">{myCoach.displayName}</span>
+                      <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
+                        ACTIVE COACH
+                      </span>
+                    </div>
+                    <p className="text-gray-400 text-xs">{myCoach.specialization}</p>
+                  </div>
+                </div>
+                <Link 
+                  to="/dashboard/workout"
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1 transition-colors"
+                >
+                  <span>Train</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            ) : currentUser ? (
+              <div className="p-4 rounded-2xl bg-[#14151b]/90 backdrop-blur-md border border-[#ef233c]/30 flex items-center gap-3 max-w-lg mb-6">
+                <AlertCircle className="w-5 h-5 text-[#ef233c] shrink-0" />
+                <p className="text-xs text-gray-300">
+                  You haven't selected a coach yet. Choose an AI Coach below to personalize your workout cueing and daily goals!
+                </p>
+              </div>
+            ) : null}
+
+            {/* Mode Tabs: AI Coaches vs Human Trainers */}
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setActiveTab('ai')}
+                className={`px-6 py-3 rounded-xl font-bold uppercase text-xs tracking-wider flex items-center gap-2 transition-all ${
+                  activeTab === 'ai'
+                    ? 'bg-[#ef233c] text-white shadow-[0_4px_20px_rgba(239,35,60,0.4)]'
+                    : 'bg-[#181920] border border-white/10 text-gray-400 hover:text-white'
+                }`}
+              >
+                <Bot className="w-4 h-4" />
+                <span>AI Coaches ({coaches.length})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('human')}
+                className={`px-6 py-3 rounded-xl font-bold uppercase text-xs tracking-wider flex items-center gap-2 transition-all ${
+                  activeTab === 'human'
+                    ? 'bg-[#ef233c] text-white shadow-[0_4px_20px_rgba(239,35,60,0.4)]'
+                    : 'bg-[#181920] border border-white/10 text-gray-400 hover:text-white'
+                }`}
+              >
+                <Users className="w-4 h-4" />
+                <span>Certified Personal Trainers</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content Area */}
+      <div className="px-4 sm:px-8 py-12 border-t border-white/5 bg-[#121318]">
+        <div className="max-w-7xl mx-auto">
+
+          {/* AI COACHES VIEW */}
+          {activeTab === 'ai' && (
+            <div>
+              {/* Filter Controls Bar */}
+              <div className="bg-[#14151b] border border-white/10 rounded-2xl p-6 mb-10 shadow-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#ef233c]">
+                    <Filter className="w-4 h-4" />
+                    <span>Filter AI Coaches</span>
+                  </div>
+                  <span className="text-xs text-gray-400">
+                    Showing <strong className="text-white">{filteredCoaches.length}</strong> of {coaches.length} coaches
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Gender Filter */}
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">
+                      Coach Gender
+                    </label>
+                    <div className="flex rounded-xl bg-[#181920] p-1 border border-white/5">
+                      {['ALL', 'MALE', 'FEMALE'].map(g => (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => setSelectedGender(g)}
+                          className={`flex-1 py-1.5 text-xs font-bold uppercase rounded-lg transition-all ${
+                            selectedGender === g 
+                              ? 'bg-[#ef233c] text-white shadow-sm' 
+                              : 'text-gray-400 hover:text-white'
+                          }`}
+                        >
+                          {g === 'ALL' ? 'All' : g === 'MALE' ? 'Male' : 'Female'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Access Tier Filter */}
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">
+                      Access Tier
+                    </label>
+                    <div className="flex rounded-xl bg-[#181920] p-1 border border-white/5">
+                      {['ALL', 'FREE', 'PREMIUM'].map(t => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setSelectedTier(t)}
+                          className={`flex-1 py-1.5 text-xs font-bold uppercase rounded-lg transition-all ${
+                            selectedTier === t 
+                              ? 'bg-[#ef233c] text-white shadow-sm' 
+                              : 'text-gray-400 hover:text-white'
+                          }`}
+                        >
+                          {t === 'ALL' ? 'All' : t === 'FREE' ? 'Free (8)' : 'Pro (6)'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Category Filter */}
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">
+                      Fitness Goal & Discipline
+                    </label>
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="w-full bg-[#181920] border border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-[#ef233c]"
+                    >
+                      {categories.map(c => (
+                        <option key={c.key} value={c.key}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Coaches Grid */}
+              {isLoading ? (
+                <div className="text-center py-20 text-[#ef233c] font-bold tracking-widest uppercase animate-pulse">
+                  Loading AI Coaches...
+                </div>
+              ) : filteredCoaches.length === 0 ? (
+                <div className="text-center py-16 bg-[#14151b] rounded-2xl border border-white/5 p-8">
+                  <Bot className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+                  <p className="text-white font-bold text-sm uppercase">No AI coaches match the selected filters.</p>
+                  <button 
+                    onClick={() => { setSelectedGender('ALL'); setSelectedTier('ALL'); setSelectedCategory('ALL'); }}
+                    className="mt-4 text-xs font-bold text-[#ef233c] hover:underline uppercase"
+                  >
+                    Reset Filters
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+                  {filteredCoaches.map((coach) => {
+                    const isCurrent = myCoach?.id === coach.id || coach.selected;
+                    const isPremium = coach.tier === 'PREMIUM';
+
+                    return (
+                      <div 
+                        key={coach.id}
+                        className={`bg-[#14151b] rounded-2xl border transition-all duration-300 flex flex-col overflow-hidden relative group hover:-translate-y-1 ${
+                          isCurrent
+                            ? 'border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.25)]'
+                            : isPremium
+                            ? 'border-amber-500/40 hover:border-amber-400 hover:shadow-[0_0_25px_rgba(245,158,11,0.2)]'
+                            : 'border-white/10 hover:border-[#ef233c]/60 hover:shadow-[0_0_20px_rgba(239,35,60,0.15)]'
+                        }`}
+                      >
+                        {/* Coach Avatar Header */}
+                        <div className="h-60 w-full overflow-hidden relative bg-[#181920]">
+                          <img 
+                            src={coach.avatarUrl} 
+                            alt={coach.displayName} 
+                            className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#14151b] via-[#14151b]/40 to-transparent"></div>
+
+                          {/* Tier Badge */}
+                          <div className="absolute top-3 left-3 flex items-center gap-2">
+                            {isPremium ? (
+                              <span className="bg-amber-950/90 border border-amber-400/80 text-amber-300 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-lg backdrop-blur-md">
+                                <Crown className="w-3.5 h-3.5 text-amber-400" /> PRO COACH
+                              </span>
+                            ) : (
+                              <span className="bg-emerald-950/90 border border-emerald-400/60 text-emerald-300 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-lg backdrop-blur-md">
+                                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> FREE ACCESS
+                              </span>
+                            )}
+                            <span className="bg-black/75 border border-white/10 text-gray-300 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md">
+                              {coach.gender}
+                            </span>
+                          </div>
+
+                          {/* Active Badge */}
+                          {isCurrent && (
+                            <div className="absolute top-3 right-3 bg-emerald-500 text-black px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-xl">
+                              <CheckCircle2 className="w-3.5 h-3.5" /> ACTIVE COACH
+                            </div>
+                          )}
+
+                          {/* Coach Name Overlay */}
+                          <div className="absolute bottom-3 left-4 right-4">
+                            <h3 className="text-2xl font-black font-display uppercase tracking-wide text-white flex items-center gap-2">
+                              {coach.displayName}
+                              {isPremium && <Sparkles className="w-4 h-4 text-amber-400" />}
+                            </h3>
+                            <p className="text-xs font-bold text-[#ef233c] uppercase tracking-wider">
+                              {coach.specialization}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Coach Details Body */}
+                        <div className="p-6 flex-1 flex flex-col justify-between">
+                          <div className="space-y-4">
+                            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
+                              {coach.description}
+                            </p>
+
+                            {/* Coaching Style Box */}
+                            <div className="bg-[#181920] border border-white/5 rounded-xl p-3">
+                              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+                                Coaching Philosophy:
+                              </span>
+                              <p className="text-xs text-gray-300 italic">
+                                "{coach.coachingStyle}"
+                              </p>
+                            </div>
+
+                            {/* Supported Disciplines */}
+                            <div className="flex flex-wrap gap-1.5">
+                              {coach.supportedCategories?.map(cat => (
+                                <span 
+                                  key={cat} 
+                                  className="text-[10px] uppercase font-bold tracking-wider bg-[#101116] px-2.5 py-1 rounded-md text-gray-400 border border-white/5"
+                                >
+                                  {cat.replace(/_/g, ' ')}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Selection Button */}
+                          <div className="pt-6 border-t border-white/5 mt-4">
+                            {isCurrent ? (
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                                  <UserCheck className="w-4 h-4" /> Currently Coaching You
+                                </span>
+                                <Link 
+                                  to="/dashboard/workout"
+                                  className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1 transition-all"
+                                >
+                                  <span>Start Session</span>
+                                  <ArrowRight className="w-3.5 h-3.5" />
+                                </Link>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled={isSelecting === coach.id}
+                                onClick={() => handleSelectCoach(coach)}
+                                className={`w-full py-3 px-4 rounded-xl font-bold uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2 ${
+                                  isPremium
+                                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black shadow-[0_4px_16px_rgba(245,158,11,0.3)]'
+                                    : 'bg-[#ef233c] hover:bg-[#d90429] text-white shadow-[0_4px_16px_rgba(239,35,60,0.35)]'
+                                }`}
+                              >
+                                {isSelecting === coach.id ? (
+                                  <span>Setting Coach...</span>
+                                ) : isPremium ? (
+                                  <>
+                                    <Crown className="w-4 h-4" />
+                                    <span>Select {coach.displayName} (Pro)</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Check className="w-4 h-4" />
+                                    <span>Select {coach.displayName}</span>
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* HUMAN TRAINERS VIEW */}
+          {activeTab === 'human' && (
+            <div>
+              <div className="text-center max-w-2xl mx-auto mb-12">
+                <h2 className="text-2xl sm:text-3xl font-black font-display uppercase tracking-wide text-white mb-2">
+                  Certified In-Gym Personal Coaches
+                </h2>
+                <p className="text-gray-400 text-xs sm:text-sm">
+                  Book 1-on-1 private training sessions at our flagship facilities for hands-on barbell technique, biomechanical assessment, and competition prep.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {humanTrainers.map((trainer) => (
+                  <div 
+                    key={trainer.id}
+                    className="bg-[#14151b] border border-white/5 rounded-2xl overflow-hidden hover:border-[#ef233c]/50 transition-all duration-300 flex flex-col group hover:-translate-y-1"
+                  >
+                    <div className="h-64 w-full overflow-hidden relative bg-[#181920]">
+                      <img 
+                        src={trainer.profileImageUrl} 
+                        alt={trainer.name} 
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#14151b] to-transparent"></div>
+                      <div className="absolute top-3 left-3 bg-black/80 border border-white/10 text-gray-200 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md">
+                        Master Personal Coach
+                      </div>
+                    </div>
+
+                    <div className="p-6 flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="text-xl font-black font-display uppercase tracking-wide text-white mb-1">
+                          {trainer.name}
+                        </h3>
+                        <p className="text-xs font-bold text-[#ef233c] uppercase tracking-wider mb-3">
+                          {trainer.specialization?.split(',')[0]}
+                        </p>
+                        <p className="text-gray-400 text-xs leading-relaxed mb-4">
+                          {trainer.bio || 'Specialized in individualized athletic periodization and progressive overload.'}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5 mb-6">
+                          {(trainer.tags || trainer.specialization?.split(',')).slice(0, 3).map(tag => (
+                            <span key={tag} className="text-[10px] uppercase font-bold tracking-wider bg-[#181920] px-2.5 py-1 rounded text-gray-400 border border-white/5">
+                              {tag.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Link 
+                        to={`/trainers/${trainer.id}`}
+                        className="w-full py-3 px-4 rounded-xl font-bold uppercase text-xs tracking-wider border border-white/20 hover:border-[#ef233c] text-white hover:text-[#ef233c] transition-colors flex items-center justify-center gap-1.5"
+                      >
+                        <span>View Trainer Profile & Schedule</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+
+      {/* Methodology Section */}
+      <div className="py-20 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/5">
+        <div className="text-center mb-14">
+          <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#ef233c] mb-2">
+            The FitFlow Training System
+          </div>
+          <h2 className="text-3xl sm:text-5xl font-black font-display uppercase tracking-tight text-white">
+            BIOMECHANICAL INTELLIGENCE. REAL RESULTS.
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { num: '01', title: 'FORM VERIFICATION', desc: 'Real-time biomechanical analysis compares your joint angles against golden-standard human movement patterns.' },
+            { num: '02', title: 'ADAPTIVE VOLUME', desc: 'Weekly sets and reps dynamically increase or deload depending on reported fatigue and completion rate.' },
+            { num: '03', title: 'CONTINUOUS CUES', desc: 'Your chosen coach delivers precise breathing tempos and posture reminders during every active workout.' },
+            { num: '04', title: 'POSTGRES METRICS', desc: 'Every workout session, rep count, and calorie burn is securely logged to your permanent fitness profile.' }
+          ].map(item => (
+            <div key={item.num} className="bg-[#14151b] border border-white/5 rounded-2xl p-6 hover:border-[#ef233c]/40 transition-colors">
+              <span className="text-[#ef233c] font-black text-2xl font-display block mb-2">{item.num}</span>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-white mb-2">{item.title}</h3>
+              <p className="text-gray-400 text-xs leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Premium Upgrade Modal */}
+      {showPremiumModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#14151b] border border-amber-500/50 rounded-3xl w-full max-w-md p-6 shadow-[0_0_50px_rgba(245,158,11,0.25)] animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-4">
+              <Crown className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-black font-display uppercase tracking-wide text-white mb-1">
+              PRO COACH ACCESS REQUIRED
+            </h3>
+            <p className="text-xs text-gray-300 leading-relaxed mb-6">
+              Coach <strong className="text-amber-400">{premiumModalCoach?.displayName}</strong> provides elite-tier training programming ({premiumModalCoach?.specialization}). Pro coaches are available exclusively on the FitFlow Pro Subscription.
+            </p>
+
+            <div className="bg-[#181920] border border-white/5 rounded-xl p-4 mb-6 space-y-2 text-xs">
+              <div className="flex items-center justify-between text-gray-300">
+                <span>Current Status:</span>
+                <span className="font-bold text-gray-400">
+                  {subscription?.status || 'FREE TIER'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-gray-300">
+                <span>Free AI Coaches:</span>
+                <span className="font-bold text-emerald-400">8 Coaches Available</span>
+              </div>
+              <div className="flex items-center justify-between text-gray-300">
+                <span>Pro AI Coaches:</span>
+                <span className="font-bold text-amber-400">6 Specialized Coaches</span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowPremiumModal(false)}
+                className="flex-1 py-3 bg-[#181920] hover:bg-white/10 text-gray-300 rounded-xl font-bold uppercase text-xs tracking-wider transition-colors"
+              >
+                Close
+              </button>
+              <Link
+                to="/dashboard/account"
+                className="flex-1 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black text-center rounded-xl font-bold uppercase text-xs tracking-wider transition-all shadow-[0_4px_16px_rgba(245,158,11,0.3)]"
+              >
+                View Plans
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer className="border-t border-white/5 bg-[#0b0c10] py-12 px-4 sm:px-8 text-center text-xs text-gray-500 uppercase tracking-widest">
+        FitFlow Athletic Performance &copy; 2026. All rights reserved.
+      </footer>
+    </div>
+  );
 }

@@ -39,8 +39,14 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/**", "/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/trainers/**", "/api/v1/trainers/**").permitAll()
+                .requestMatchers("/api/careers/**").permitAll()
+                .requestMatchers("/api/db/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                // Admin endpoints: double protection (SecurityConfig + @PreAuthorize in controller)
                 .requestMatchers("/api/admin/**", "/api/v1/admin/**").hasRole("ADMIN")
+                // Coach directory (authenticated users only — anonymous can use /api/coaches without auth for browsing)
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/coaches", "/api/coaches/{id}").permitAll()
+                .requestMatchers("/api/coaches/**").authenticated()
                 .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -49,6 +55,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
     @Bean
     public AuthenticationProvider authenticationProvider() {

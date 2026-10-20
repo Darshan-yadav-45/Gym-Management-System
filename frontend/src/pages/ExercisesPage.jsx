@@ -13,10 +13,12 @@ import {
   X, 
   Check, 
   Info,
-  ChevronDown
+  ChevronDown,
+  Play
 } from 'lucide-react';
 import UserLayout from '../components/layout/UserLayout';
 import { ExerciseThumbnail, IntensityBars } from '../components/dashboard/ExerciseIllustrations';
+import Exercise3DViewer from '../components/dashboard/Exercise3DViewer';
 import { exerciseService } from '../services/exerciseService';
 
 export default function ExercisesPage() {
@@ -144,6 +146,127 @@ export default function ExercisesPage() {
       equipmentEnum: 'DUMBBELLS',
       intensity: 3,
       instructions: 'Press dumbbells together tightly in the center throughout the entire range of motion to maximize inner chest activation.'
+    },
+    {
+      id: 10,
+      name: 'Bodyweight Squat',
+      muscle: 'Quads',
+      muscleEnum: 'QUADS',
+      type: 'Bodyweight',
+      equipment: 'No Equipment',
+      equipmentEnum: 'NO_EQUIPMENT',
+      intensity: 3,
+      instructions: 'Stand shoulder-width apart, hinge hips back and bend knees to 90 degrees while keeping chest proud, drive through heels to stand.'
+    },
+    {
+      id: 11,
+      name: 'Lunges',
+      muscle: 'Quads',
+      muscleEnum: 'QUADS',
+      type: 'Bodyweight',
+      equipment: 'No Equipment',
+      equipmentEnum: 'NO_EQUIPMENT',
+      intensity: 3,
+      instructions: 'Step forward into a deep stride, drop rear knee until hovering an inch above ground with front knee at 90 degrees, drive back up.'
+    },
+    {
+      id: 12,
+      name: 'Plank',
+      muscle: 'Abs',
+      muscleEnum: 'ABS',
+      type: 'Bodyweight',
+      equipment: 'No Equipment',
+      equipmentEnum: 'NO_EQUIPMENT',
+      intensity: 3,
+      instructions: 'Rest on forearms and toes, maintain an unbroken straight line from crown of head to heels, brace core and glutes firmly.'
+    },
+    {
+      id: 13,
+      name: 'Jumping Jacks',
+      muscle: 'Calves',
+      muscleEnum: 'CALVES',
+      type: 'Cardio',
+      equipment: 'No Equipment',
+      equipmentEnum: 'NO_EQUIPMENT',
+      intensity: 2,
+      instructions: 'Jump feet outward while sweeping arms overhead in a wide arc, rhythmically jump back to starting position.'
+    },
+    {
+      id: 14,
+      name: 'Dumbbell Curl',
+      muscle: 'Biceps',
+      muscleEnum: 'BICEPS',
+      type: 'Weights',
+      equipment: 'Dumbbells',
+      equipmentEnum: 'DUMBBELLS',
+      intensity: 3,
+      instructions: 'Hold dumbbells with palms forward, keep elbows pinned at your ribs, curl weights to shoulder level with peak squeeze and lower slowly.'
+    },
+    {
+      id: 15,
+      name: 'Dumbbell Shoulder Press',
+      muscle: 'Shoulders',
+      muscleEnum: 'SHOULDERS',
+      type: 'Weights',
+      equipment: 'Dumbbells',
+      equipmentEnum: 'DUMBBELLS',
+      intensity: 4,
+      instructions: 'Hold dumbbells at ear height with 90-degree elbow bend, press vertically overhead without clanking dumbbells, lower with control.'
+    },
+    {
+      id: 16,
+      name: 'Downward-Facing Dog (Yoga)',
+      muscle: 'Hamstrings',
+      muscleEnum: 'HAMSTRINGS',
+      type: 'Yoga',
+      equipment: 'No Equipment',
+      equipmentEnum: 'NO_EQUIPMENT',
+      intensity: 2,
+      instructions: 'Form an inverted V-shape, push hips upward and back, lengthen through spine, press heels gently toward mat and breathe deeply.'
+    },
+    {
+      id: 17,
+      name: 'Warrior II Pose (Yoga)',
+      muscle: 'Quads',
+      muscleEnum: 'QUADS',
+      type: 'Yoga',
+      equipment: 'No Equipment',
+      equipmentEnum: 'NO_EQUIPMENT',
+      intensity: 2,
+      instructions: 'Step into a deep lateral lunge with front knee over ankle, extend arms parallel to floor, gaze over front fingertips.'
+    },
+    {
+      id: 18,
+      name: 'Cat-Cow Spine Mobility',
+      muscle: 'Traps',
+      muscleEnum: 'TRAPS',
+      type: 'Recovery',
+      equipment: 'No Equipment',
+      equipmentEnum: 'NO_EQUIPMENT',
+      intensity: 1,
+      instructions: 'On all fours, inhale to arch spine downward into Cow with chest open, exhale to round spine upward into Cat with chin tucked.'
+    },
+    {
+      id: 19,
+      name: 'Standing Hamstring Stretch',
+      muscle: 'Hamstrings',
+      muscleEnum: 'HAMSTRINGS',
+      type: 'Recovery',
+      equipment: 'No Equipment',
+      equipmentEnum: 'NO_EQUIPMENT',
+      intensity: 1,
+      instructions: 'Place one heel forward on ground, hinge hips back with hands on thigh, gently feel posterior leg stretch without rounding spine.'
+    },
+    {
+      id: 20,
+      name: 'Cobra Core Stretch',
+      muscle: 'Abs',
+      muscleEnum: 'ABS',
+      type: 'Recovery',
+      equipment: 'No Equipment',
+      equipmentEnum: 'NO_EQUIPMENT',
+      intensity: 1,
+      instructions: 'Lie prone, place hands beneath shoulders, gently extend elbows to lift chest off floor while relaxing hips, stretching abdominal wall.'
     }
   ]);
 
@@ -496,30 +619,44 @@ export default function ExercisesPage() {
                     </div>
                   </div>
 
-                  {/* Right: Star Outline Favorite Button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(exercise.name);
-                    }}
-                    title={isFav ? "Remove favorite" : "Add to favorites"}
-                    className="p-2 text-gray-400 hover:text-yellow-400 transition-colors rounded-full hover:bg-white/5"
-                  >
-                    <Star className={`w-5 h-5 ${isFav ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}`} />
-                  </button>
+                  {/* Right: Demonstration Action + Favorite Button */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedExercise(exercise);
+                      }}
+                      className="bg-[#ef233c]/15 hover:bg-[#ef233c] text-[#ff4d6d] hover:text-white border border-[#ef233c]/30 px-3 py-1.5 rounded-xl text-[10px] font-extrabold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                      title="Watch Real Human Exercise Demonstration"
+                    >
+                      <Play className="w-3 h-3 fill-current" />
+                      <span>Watch Demo</span>
+                    </button>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(exercise.name);
+                      }}
+                      title={isFav ? "Remove favorite" : "Add to favorites"}
+                      className="p-2 text-gray-400 hover:text-yellow-400 transition-colors rounded-full hover:bg-white/5 cursor-pointer"
+                    >
+                      <Star className={`w-5 h-5 ${isFav ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}`} />
+                    </button>
+                  </div>
                 </div>
               );
             })
           )}
         </div>
 
-        {/* EXERCISE DETAIL MODAL */}
+        {/* EXERCISE DETAIL MODAL WITH 3D HUMAN BIOMECHANICAL VIEWER */}
         {selectedExercise && (
-          <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-[#12162B] border border-blue-500/30 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-              <div className="p-5 bg-[#181E3B] border-b border-white/10 flex items-center justify-between">
+          <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+            <div className="bg-[#0e111e] border border-white/10 rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+              <div className="p-4 bg-[#14182b] border-b border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <ExerciseThumbnail name={selectedExercise.name} className="w-12 h-12" />
+                  <ExerciseThumbnail name={selectedExercise.name} className="w-10 h-10" />
                   <div>
                     <h3 className="text-base font-black text-white">{selectedExercise.name}</h3>
                     <p className="text-xs text-blue-400 font-semibold">{selectedExercise.muscle} • {selectedExercise.equipment}</p>
@@ -527,36 +664,27 @@ export default function ExercisesPage() {
                 </div>
                 <button
                   onClick={() => setSelectedExercise(null)}
-                  className="p-1.5 text-gray-400 hover:text-white rounded-full hover:bg-white/10"
+                  className="p-2 text-gray-400 hover:text-white rounded-full hover:bg-white/10 transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="p-5 space-y-4">
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Execution & Form</h4>
-                  <p className="text-xs text-gray-200 leading-relaxed bg-[#0A0D1D] p-3 rounded-xl border border-white/5">
-                    {selectedExercise.instructions}
-                  </p>
-                </div>
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+                <Exercise3DViewer
+                  exerciseName={selectedExercise.name}
+                  muscleGroup={selectedExercise.muscle}
+                  equipment={selectedExercise.equipment}
+                  instructions={selectedExercise.instructions}
+                />
+              </div>
 
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="bg-[#181E3B] p-3 rounded-xl border border-white/5">
-                    <span className="text-gray-400 block text-[10px] uppercase">Equipment</span>
-                    <span className="font-bold text-white mt-0.5 block">{selectedExercise.equipment}</span>
-                  </div>
-                  <div className="bg-[#181E3B] p-3 rounded-xl border border-white/5">
-                    <span className="text-gray-400 block text-[10px] uppercase">Recommended Sets</span>
-                    <span className="font-bold text-[#00A3FF] mt-0.5 block">3 sets x 10 reps</span>
-                  </div>
-                </div>
-
+              <div className="p-4 bg-[#14182b] border-t border-white/10 flex justify-end">
                 <button
                   onClick={() => setSelectedExercise(null)}
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl text-xs transition-colors"
+                  className="w-full sm:w-auto px-6 py-2.5 bg-[#ef233c] hover:bg-[#d90429] text-white font-extrabold rounded-xl text-xs uppercase tracking-wider transition-colors shadow-lg"
                 >
-                  Got It
+                  Close Viewer
                 </button>
               </div>
             </div>

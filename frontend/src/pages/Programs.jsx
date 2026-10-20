@@ -1,184 +1,223 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Activity, Zap, Flame, Heart, Target, Dumbbell } from 'lucide-react';
+import { ArrowRight, Activity, Zap, Flame, Heart, Target, Dumbbell, ShieldCheck, ChevronRight } from 'lucide-react';
 
 export default function Programs() {
-    const programs = [
-        {
-            id: 1,
-            title: "Strength & Power",
-            desc: "Build raw strength and increase muscle mass through heavy compound lifting.",
-            level: "Intermediate/Advanced",
-            duration: "12 Weeks",
-            icon: Dumbbell,
-            image: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=800",
-            tags: ["Barbell", "Powerlifting", "Muscle"]
-        },
-        {
-            id: 2,
-            title: "HIIT & Conditioning",
-            desc: "High-intensity interval training to burn fat and skyrocket cardiovascular endurance.",
-            level: "All Levels",
-            duration: "8 Weeks",
-            icon: Flame,
-            image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=800",
-            tags: ["Cardio", "Fat Loss", "Intensity"]
-        },
-        {
-            id: 3,
-            title: "Functional Fitness",
-            desc: "Train your body for real-world activities using dynamic movements and kettlebells.",
-            level: "All Levels",
-            duration: "10 Weeks",
-            icon: Activity,
-            image: "https://images.unsplash.com/photo-1554244933-d876deb6b2fa?q=80&w=800",
-            tags: ["Mobility", "Kettlebell", "Core"]
-        },
-        {
-            id: 4,
-            title: "Zero Equipment Home",
-            desc: "A complete calisthenics and bodyweight routine you can do anywhere, anytime.",
-            level: "Beginner Friendly",
-            duration: "6 Weeks",
-            icon: Zap,
-            image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=800",
-            tags: ["Home", "Bodyweight", "No Gear"]
-        },
-        {
-            id: 5,
-            title: "Yoga & Flexibility",
-            desc: "Enhance your mind-body connection, improve mobility, and speed up recovery.",
-            level: "All Levels",
-            duration: "Ongoing",
-            icon: Heart,
-            image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800",
-            tags: ["Yoga", "Recovery", "Stretching"]
-        },
-        {
-            id: 6,
-            title: "Sports Performance",
-            desc: "Agility, speed, and explosive power training tailored for athletes.",
-            level: "Advanced",
-            duration: "16 Weeks",
-            icon: Target,
-            image: "https://images.unsplash.com/photo-1526506114642-54a0fc0c213c?q=80&w=800",
-            tags: ["Agility", "Speed", "Athletics"]
-        }
-    ];
+  const programs = [
+    {
+      id: "muscle-building",
+      title: "Muscle Building",
+      category: "Hypertrophy",
+      level: "Intermediate/Advanced",
+      duration: "12 Weeks",
+      schedule: "4-5 Days/Wk",
+      desc: "Mechanical tension, metabolic fatigue, and high-yield volume to maximize muscular growth and symmetry.",
+      image: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=800&auto=format&fit=crop",
+      tags: ["Hypertrophy", "Dumbbells", "Barbell"]
+    },
+    {
+      id: "weight-gain",
+      title: "Weight Gain",
+      category: "Mass Protocol",
+      level: "All Levels",
+      duration: "10 Weeks",
+      schedule: "4 Days/Wk",
+      desc: "Heavy compound overload paired with structured volume to pack on dense athletic mass safely.",
+      image: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=800&auto=format&fit=crop",
+      tags: ["Compound Lifts", "Mass", "Power"]
+    },
+    {
+      id: "weight-loss",
+      title: "Weight Loss",
+      category: "Fat Shred",
+      level: "All Levels",
+      duration: "8 Weeks",
+      schedule: "4-5 Days/Wk",
+      desc: "High-density metabolic conditioning circuits that burn calories while protecting lean muscle mass.",
+      image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=800&auto=format&fit=crop",
+      tags: ["HIIT", "Metabolic", "Calorie Burn"]
+    },
+    {
+      id: "strength-training",
+      title: "Strength Training",
+      category: "Powerlifting",
+      level: "Intermediate/Advanced",
+      duration: "12 Weeks",
+      schedule: "3-4 Days/Wk",
+      desc: "Periodized progression for the squat, bench press, and deadlift to shatter personal strength records.",
+      image: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=800&auto=format&fit=crop",
+      tags: ["Powerlifting", "Heavy Barbell", "PRs"]
+    },
+    {
+      id: "yoga-flexibility",
+      title: "Yoga and Flexibility",
+      category: "Mobility & Flow",
+      level: "All Levels",
+      duration: "Ongoing",
+      schedule: "Daily Sessions",
+      desc: "Full-body kinetic chain decompression, restorative breathwork, and deep joint mobility protocols.",
+      image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop",
+      tags: ["Mobility", "Fascia", "Recovery"]
+    },
+    {
+      id: "sports-conditioning",
+      title: "Sports Conditioning",
+      category: "Athletic Performance",
+      level: "Advanced",
+      duration: "10 Weeks",
+      schedule: "4 Days/Wk",
+      desc: "Rotational power, kinetic agility, reactive plyometrics, and multidirectional sprint acceleration.",
+      image: "https://images.unsplash.com/photo-1526506114642-54a0fc0c213c?q=80&w=800&auto=format&fit=crop",
+      tags: ["Agility", "Plyometrics", "Speed"]
+    },
+    {
+      id: "home-workouts",
+      title: "Home Workouts",
+      category: "Zero Equipment",
+      level: "Beginner Friendly",
+      duration: "6 Weeks",
+      schedule: "3-5 Days/Wk",
+      desc: "100% equipment-free calisthenics, core stability routines, and bodyweight progressions anywhere.",
+      image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=800&auto=format&fit=crop",
+      tags: ["Calisthenics", "Core", "No Gear"]
+    },
+    {
+      id: "cardio-endurance",
+      title: "Cardio and Endurance",
+      category: "Aerobic Capacity",
+      level: "All Levels",
+      duration: "8 Weeks",
+      schedule: "3-4 Days/Wk",
+      desc: "Cardiovascular VO2 max expansion, lactate threshold pacing, and energetic stamina conditioning.",
+      image: "https://images.unsplash.com/photo-1486218119243-13883505764c?q=80&w=800&auto=format&fit=crop",
+      tags: ["VO2 Max", "Endurance", "Stamina"]
+    }
+  ];
 
-    return (
-        <div className="min-h-screen bg-[#060913] text-white font-sans overflow-hidden">
-            {/* Navigation (Matching Home) */}
-            <nav className="absolute w-full z-50 top-0 left-0 bg-gradient-to-b from-black/80 to-transparent">
-                <div className="max-w-7xl mx-auto px-8 py-6 flex justify-between items-center">
-                    <Link to="/" className="text-2xl font-black font-display tracking-[0.2em] text-white">
-                        FIT<span className="text-gym-accent">FLOW</span>
-                    </Link>
-                    <div className="hidden md:flex gap-8 text-sm font-bold tracking-widest uppercase">
-                        <Link to="/" className="hover:text-gym-accent transition-colors">Home</Link>
-                        <Link to="/programs" className="text-gym-accent transition-colors">Programs</Link>
-                        <Link to="/trainers" className="hover:text-gym-accent transition-colors">Trainers</Link>
-                        <Link to="/login" className="hover:text-gym-accent transition-colors">Login</Link>
-                    </div>
-                    <Link to="/register" className="bg-gym-accent text-white px-6 py-2 uppercase tracking-widest font-bold text-xs hover:bg-white hover:text-[#060913] transition-colors duration-300">
-                        Join Now
-                    </Link>
-                </div>
-            </nav>
-
-            {/* Header Section */}
-            <div className="relative pt-40 pb-20 px-8">
-                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gym-accent/5 rounded-full blur-[150px] pointer-events-none transform translate-x-1/2 -translate-y-1/2"></div>
-                
-                <div className="max-w-7xl mx-auto relative z-10 text-center">
-                    <h1 className="text-5xl md:text-7xl font-display font-black uppercase tracking-tighter mb-6">
-                        Elite <span className="text-gym-accent">Programs</span>
-                    </h1>
-                    <p className="text-gray-400 max-w-2xl mx-auto text-lg md:text-xl font-light">
-                        Choose from our selection of professionally designed training programs tailored to your specific fitness goals.
-                    </p>
-                </div>
-            </div>
-
-            {/* Programs Grid */}
-            <div className="max-w-7xl mx-auto px-8 pb-32 relative z-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {programs.map((prog) => {
-                        const Icon = prog.icon;
-                        return (
-                            <div key={prog.id} className="group relative bg-[#151A2C] border border-white/5 overflow-hidden transition-all duration-500 hover:border-gym-accent/50 flex flex-col">
-                                {/* Image Section */}
-                                <div className="h-56 w-full relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
-                                    <img 
-                                        src={prog.image} 
-                                        alt={prog.title} 
-                                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700"
-                                    />
-                                    {/* Difficulty Badge */}
-                                    <div className="absolute top-4 left-4 z-20 bg-black/80 backdrop-blur border border-white/10 px-3 py-1 text-[10px] font-bold tracking-widest uppercase text-white">
-                                        {prog.level}
-                                    </div>
-                                    {/* Duration Badge */}
-                                    <div className="absolute top-4 right-4 z-20 bg-gym-accent px-3 py-1 text-[10px] font-bold tracking-widest uppercase text-white">
-                                        {prog.duration}
-                                    </div>
-                                </div>
-
-                                {/* Content Section */}
-                                <div className="p-8 flex-grow flex flex-col">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="w-10 h-10 rounded-full bg-gym-accent/10 flex items-center justify-center text-gym-accent group-hover:scale-110 transition-transform">
-                                            <Icon className="w-5 h-5" />
-                                        </div>
-                                        <h3 className="text-xl font-display font-black uppercase tracking-wide group-hover:text-gym-accent transition-colors">
-                                            {prog.title}
-                                        </h3>
-                                    </div>
-                                    
-                                    <p className="text-gray-400 text-sm leading-relaxed mb-6 flex-grow">
-                                        {prog.desc}
-                                    </p>
-
-                                    {/* Tags */}
-                                    <div className="flex flex-wrap gap-2 mb-8">
-                                        {prog.tags.map(tag => (
-                                            <span key={tag} className="text-[10px] font-bold tracking-wider uppercase bg-white/5 px-2 py-1 text-gray-400">
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
-
-                                    {/* Action Button */}
-                                    <Link to="/register" className="flex items-center justify-between border-t border-white/10 pt-4 group/btn">
-                                        <span className="text-xs font-bold tracking-widest uppercase text-white group-hover/btn:text-gym-accent transition-colors">
-                                            Start Program
-                                        </span>
-                                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover/btn:bg-gym-accent transition-colors">
-                                            <ArrowRight className="w-4 h-4" />
-                                        </div>
-                                    </Link>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-            
-            {/* Call to Action Footer */}
-            <div className="border-t border-white/5 bg-[#0A0D18]">
-                <div className="max-w-7xl mx-auto px-8 py-20 text-center">
-                    <h2 className="text-3xl md:text-5xl font-display font-black uppercase tracking-tighter mb-6">
-                        Not sure where to <span className="text-gym-accent">start?</span>
-                    </h2>
-                    <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
-                        Sign up today and our intelligent onboarding system will recommend the perfect program based on your body, goals, and experience level.
-                    </p>
-                    <Link to="/register" className="inline-block bg-white text-[#060913] px-10 py-4 uppercase tracking-[0.2em] font-bold text-sm hover:bg-gym-accent hover:text-white transition-all duration-300">
-                        Get Your Custom Plan
-                    </Link>
-                </div>
-            </div>
+  return (
+    <div className="min-h-screen bg-[#0b0c10] text-gray-200 font-sans selection:bg-[#ef233c] selection:text-white">
+      {/* Navigation */}
+      <header className="sticky top-0 z-50 bg-[#0b0c10]/95 backdrop-blur-md border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-6 sm:px-10 py-4 flex justify-between items-center">
+          <Link to="/" className="flex items-center text-2xl sm:text-3xl font-black font-display tracking-[0.15em] text-white">
+            FIT<span className="text-[#ef233c] font-black">FLOW</span>
+          </Link>
+          <div className="hidden md:flex gap-9 text-xs font-bold tracking-widest uppercase text-gray-300">
+            <Link to="/" className="hover:text-[#ef233c] transition-colors">HOME</Link>
+            <Link to="/programs" className="text-[#ef233c] transition-colors">PROGRAMS</Link>
+            <Link to="/trainers" className="hover:text-[#ef233c] transition-colors">TRAINERS</Link>
+            <Link to="/login" className="hover:text-[#ef233c] transition-colors">LOGIN</Link>
+          </div>
+          <Link 
+            to="/register" 
+            className="bg-[#ef233c] hover:bg-[#d90429] text-white px-6 py-2.5 rounded font-bold uppercase tracking-widest text-xs transition-all shadow-[0_4px_16px_rgba(239,35,60,0.35)] hover:-translate-y-0.5"
+          >
+            JOIN NOW
+          </Link>
         </div>
-    );
+      </header>
+
+      {/* Header Section */}
+      <div className="relative pt-24 pb-16 px-4 sm:px-8 text-center bg-[#121318] border-b border-white/5">
+        <div className="max-w-4xl mx-auto relative z-10">
+          <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#ef233c] mb-3">
+            TRAINING PROTOCOLS
+          </div>
+          <h1 className="text-4xl sm:text-6xl font-display font-black uppercase tracking-tight text-white mb-4">
+            ELITE <span className="text-[#ef233c]">PROGRAMS</span>
+          </h1>
+          <div className="w-16 h-1 bg-[#ef233c] mx-auto mb-6"></div>
+          <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
+            Choose from scientifically periodized training programs tailored to your precise athletic goals.
+          </p>
+        </div>
+      </div>
+
+      {/* Programs Grid */}
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {programs.map((prog) => (
+            <div 
+              key={prog.id} 
+              className="group relative bg-[#14151b] border border-white/5 hover:border-[#ef233c]/60 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between shadow-lg"
+            >
+              <div>
+                {/* Image Section */}
+                <div className="h-52 w-full relative overflow-hidden bg-[#181920]">
+                  <img 
+                    src={prog.image} 
+                    alt={prog.title} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#14151b] via-black/40 to-transparent"></div>
+                  
+                  {/* Badges */}
+                  <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-md border border-white/10 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase text-white">
+                    {prog.level}
+                  </div>
+                  <div className="absolute top-3 right-3 bg-[#ef233c] px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase text-white shadow-md">
+                    {prog.duration}
+                  </div>
+                </div>
+
+                {/* Content Section */}
+                <div className="p-6">
+                  <h3 className="text-lg font-display font-bold uppercase tracking-wide text-white group-hover:text-[#ef233c] transition-colors mb-2">
+                    {prog.title}
+                  </h3>
+                  
+                  <p className="text-gray-400 text-xs leading-relaxed mb-4 min-h-[44px]">
+                    {prog.desc}
+                  </p>
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {prog.tags.map(tag => (
+                      <span key={tag} className="text-[9px] font-bold tracking-wider uppercase bg-[#181920] border border-white/5 px-2 py-0.5 rounded text-gray-400">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Link */}
+              <div className="px-6 pb-6 pt-3 border-t border-white/5">
+                <Link 
+                  to="/register" 
+                  className="flex items-center justify-between text-xs font-bold tracking-wider uppercase text-white hover:text-[#ef233c] transition-colors"
+                >
+                  <span>Start Program</span>
+                  <div className="w-7 h-7 rounded-full bg-[#181920] group-hover:bg-[#ef233c] group-hover:text-white flex items-center justify-center transition-colors">
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </div>
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {/* Call to Action Footer Banner */}
+      <div className="border-t border-white/5 bg-[#121318] py-20 px-4 sm:px-8 text-center">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#ef233c] mb-3">
+            NEED GUIDANCE?
+          </div>
+          <h2 className="text-3xl sm:text-5xl font-display font-black uppercase tracking-tight text-white mb-4">
+            NOT SURE WHERE TO <span className="text-[#ef233c]">START?</span>
+          </h2>
+          <p className="text-gray-400 text-sm max-w-xl mx-auto mb-8 leading-relaxed">
+            Create an account and our intelligent onboarding system will analyze your baseline metrics and recommend the optimal program.
+          </p>
+          <Link 
+            to="/register" 
+            className="bg-[#ef233c] hover:bg-[#d90429] text-white px-10 py-4 rounded-full uppercase tracking-wider font-bold text-xs transition-all shadow-[0_4px_20px_rgba(239,35,60,0.4)] hover:-translate-y-0.5 inline-block"
+          >
+            Get Your Custom Plan
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 }

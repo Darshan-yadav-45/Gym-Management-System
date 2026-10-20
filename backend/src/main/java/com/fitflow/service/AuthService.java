@@ -9,13 +9,16 @@ import com.fitflow.entity.enums.Role;
 import com.fitflow.repository.UserRepository;
 import com.fitflow.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -23,7 +26,11 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
+    private final SubscriptionService subscriptionService;
 
+
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
         String cleanEmail = request.getEmail().trim().toLowerCase();
         if (userRepository.existsByEmail(cleanEmail)) {
@@ -38,11 +45,22 @@ public class AuthService {
                 .role(Role.MEMBER)
                 .enabled(true)
                 .build();
-        
+
         user = userRepository.save(user);
 
+        // Create FREE subscription record for the new user
+        subscriptionService.getOrCreateFreeSubscription(user);
+
         var jwtToken = jwtService.generateToken(user);
-        
+
+        // Send welcome email — failure is logged but does NOT roll back registration
+        final User savedUser = user;
+        try {
+            emailService.sendRegistrationWelcome(savedUser);
+        } catch (Exception e) {
+            log.warn("Welcome email could not be sent to {}: {}", cleanEmail, e.getMessage());
+        }
+
         return AuthResponse.builder()
                 .success(true)
                 .message("Account created successfully")
@@ -53,6 +71,7 @@ public class AuthService {
                 .profileCompleted(false)
                 .build();
     }
+
 
     public AuthResponse login(LoginRequest request) {
         String cleanEmail = request.getEmail().trim().toLowerCase();
