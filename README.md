@@ -391,6 +391,3 @@ git log --oneline -n 10
 
 ---
 
-## 12. License & Academic Declaration
-
-This project was developed for the **Master of Computer Applications (MCA)** final review at **CMR University, Bengaluru**, under the guidance of **Dr. Deepa A.** during an internship at **Excerpt Technologies**. All rights reserved © 2026.
