@@ -1,33 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ArrowRight,
   ChevronRight, 
+  ChevronLeft,
   Bot, 
   Sparkles, 
-  User, 
   BarChart3, 
-  Dumbbell, 
-  Gauge, 
-  Award, 
   Check, 
-  Star, 
   Menu, 
   X,
   Zap,
   Activity,
   Target,
-  Flame,
-  Heart,
   Calendar,
   Clock,
   MapPin,
   Mail,
   Phone,
-  ShieldCheck,
-  CheckCircle,
-  Play
+  Play,
+  Send,
+  MessageSquare
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { authService } from '../services/authService';
 
 // Brand Social SVGs
@@ -57,13 +51,39 @@ const YoutubeIcon = ({ className = "w-4 h-4" }) => (
   </svg>
 );
 
+// Curated high-resolution fitness images for the 1-second hero background rotation
+const HERO_IMAGES = [
+  '/hero/hero-1.jpg',
+  '/hero/hero-2.jpg',
+  '/hero/hero-3.jpg',
+  '/hero/hero-4.jpg',
+  '/hero/hero-5.jpg',
+  '/hero/hero-6.jpg',
+  '/hero/hero-7.jpg',
+  '/hero/hero-8.jpg'
+];
+
 export default function Home() {
-  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [trainerTab, setTrainerTab] = useState('all');
   const [legalModal, setLegalModal] = useState(null); // 'privacy' | 'terms' | null
+
+  // 1-second hero background slideshow state
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  // Explore Our Programs horizontal scroll ref
+  const programsScrollRef = useRef(null);
+
+  // Aura AI Coach Interactive Chat Modal state
+  const [isAiChatOpen, setIsAiChatOpen] = useState(false);
+  const [aiInput, setAiInput] = useState('');
+  const [aiMessages, setAiMessages] = useState([
+    { 
+      role: 'assistant', 
+      text: 'Hello! I am Aura AI Coach, your dedicated 24/7 fitness intelligence assistant. How can I help you optimize your workouts, nutrition, or exercise routines today?' 
+    }
+  ]);
 
   useEffect(() => {
     const user = authService.getCurrentUser();
@@ -78,7 +98,26 @@ export default function Home() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    // Preload hero images to prevent flickering on 1-second rotation
+    HERO_IMAGES.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+
+    // Slideshow interval: 1000ms (1 second), respecting reduced motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let timer = null;
+    if (!prefersReducedMotion) {
+      timer = setInterval(() => {
+        setHeroIndex((prev) => (prev + 1) % HERO_IMAGES.length);
+      }, 1000);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (timer) clearInterval(timer);
+    };
   }, []);
 
   const scrollToSection = (id) => {
@@ -91,7 +130,64 @@ export default function Home() {
     }
   };
 
-  // 8 Specific Program Cards as requested
+  const scrollPrograms = (direction) => {
+    if (programsScrollRef.current) {
+      const scrollAmount = 340;
+      programsScrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const handleAiSend = (e) => {
+    if (e) e.preventDefault();
+    if (!aiInput.trim()) return;
+
+    const userMsg = aiInput.trim();
+    setAiMessages((prev) => [...prev, { role: 'user', text: userMsg }]);
+    setAiInput('');
+
+    setTimeout(() => {
+      let reply = "Great question! Consistent progressive overload, structured recovery, and proper nutrition are essential for long-term athletic success.";
+      const lower = userMsg.toLowerCase();
+      if (lower.includes('chest') || lower.includes('push') || lower.includes('bench')) {
+        reply = "For chest hypertrophy, focus on the Barbell Bench Press (3x8-10 reps) and Incline Dumbbell Press. Keep your scapula retracted and maintain a 2-second controlled eccentric phase.";
+      } else if (lower.includes('tricep') || lower.includes('dip') || lower.includes('arm')) {
+        reply = "For triceps, Cable Pushdowns and Diamond Push-ups provide intense activation of the lateral and long heads. Keep elbows locked close to your torso.";
+      } else if (lower.includes('water') || lower.includes('hydrat')) {
+        reply = "Optimal athletic performance requires 3 to 4 liters of water daily. Aim for 500ml upon waking and 250ml every 20 minutes of strenuous training.";
+      } else if (lower.includes('strength') || lower.includes('power')) {
+        reply = "For maximum strength, prioritize compound movements: Squat, Bench Press, and Deadlift at 80-88% 1RM (3-5 sets of 3-5 reps) with 3-4 minutes rest between sets.";
+      } else if (lower.includes('weight loss') || lower.includes('fat') || lower.includes('diet')) {
+        reply = "Fat shredding requires a sustained 300-500 kcal deficit while keeping protein high (1.6-2.2g per kg bodyweight) to preserve muscle mass, paired with 3-4 days of resistance training.";
+      } else if (lower.includes('routine') || lower.includes('workout') || lower.includes('plan')) {
+        reply = "A 4-day Upper/Lower or 3-day Full Body split is ideal for balanced recovery and progressive hypertrophy. You can track full routines directly in your FitFlow Dashboard.";
+      }
+      setAiMessages((prev) => [...prev, { role: 'assistant', text: reply }]);
+    }, 400);
+  };
+
+  const handleQuickPrompt = (promptText) => {
+    setIsAiChatOpen(true);
+    setAiMessages((prev) => [...prev, { role: 'user', text: promptText }]);
+    setTimeout(() => {
+      let reply = "Here is what I recommend for your athletic progress:";
+      const lower = promptText.toLowerCase();
+      if (lower.includes('chest')) {
+        reply = "For chest development, prioritize Barbell Bench Press (3x8-10 reps) and Dumbbell Incline Press with full kinetic stretch and controlled tempo.";
+      } else if (lower.includes('water') || lower.includes('hydrat')) {
+        reply = "Aim for 3-4L of daily water hydration. Proper hydration improves muscle force output by up to 15% and speeds up waste removal.";
+      } else if (lower.includes('routine') || lower.includes('beginner')) {
+        reply = "For beginners, start with our 3-day Full Body Protocol: Squats, Push-ups/Dumbbell Press, Dumbbell Rows, and Core Planks (3 sets of 10-12 reps).";
+      } else if (lower.includes('progressive overload')) {
+        reply = "Progressive overload means gradually increasing weight, reps, or sets over time. Log your numbers each week in the FitFlow Workout Tracker!";
+      }
+      setAiMessages((prev) => [...prev, { role: 'assistant', text: reply }]);
+    }, 400);
+  };
+
+  // 8 Specific Program Cards with verified high-res images
   const programs = [
     {
       id: "muscle-building",
@@ -150,7 +246,7 @@ export default function Home() {
       duration: "10 Weeks",
       schedule: "4 Days/Wk",
       desc: "Rotational power, kinetic agility, reactive plyometrics, and multidirectional sprint acceleration.",
-      image: "https://images.unsplash.com/photo-1526506114642-54a0fc0c213c?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1517963879433-6ad2b056d712?q=80&w=800&auto=format&fit=crop",
       tags: ["Agility", "Plyometrics", "Speed"]
     },
     {
@@ -175,99 +271,101 @@ export default function Home() {
     }
   ];
 
-  // Coaches & AI Trainers with gender presentation, specialization, and availability
-  const allTrainers = [
+  // 4 Master Human Trainers (Displayed in single horizontal row on desktop)
+  const humanTrainers = [
     { 
       name: "Brandon Smith", 
       gender: "Male",
       spec: "Crossfit & Olympic Lifts", 
+      experience: "8+ Years Coaching",
       availability: "Mon - Sat • 6AM - 2PM",
       img: "https://images.unsplash.com/photo-1567013127542-490d757e51fc?q=80&w=600&auto=format&fit=crop",
-      desc: "Specializes in high-intensity functional training, Olympic lifts, and endurance.",
+      desc: "Specializes in high-intensity functional training, Olympic lifts, and athletic endurance.",
       isAi: false 
     },
     { 
       name: "Lisa Parker", 
       gender: "Female",
       spec: "Yoga & Athletic Mobility", 
+      experience: "6+ Years Coaching",
       availability: "Mon - Sun • 8AM - 6PM",
       img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=600&auto=format&fit=crop",
-      desc: "Postural alignment, functional flexibility, breathwork, and athletic recovery.",
+      desc: "Postural alignment, functional flexibility, breathwork, and athletic recovery protocols.",
       isAi: false 
     },
     { 
       name: "Alex Mercer", 
       gender: "Male",
       spec: "Strength & Powerlifting", 
+      experience: "7+ Years Coaching",
       availability: "Tue - Sat • 10AM - 8PM",
       img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=600&auto=format&fit=crop",
-      desc: "Progressive overload, barbell biomechanics, and competitive powerlifting prep.",
+      desc: "Progressive overload, barbell biomechanics, and competitive powerlifting preparation.",
       isAi: false 
-    },
-    { 
-      name: "AURA AI COACH", 
-      gender: "AI System",
-      spec: "Computer Vision Form Guidance", 
-      availability: "Available 24/7 Live",
-      img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop",
-      desc: "24/7 Computer vision guidance analyzing reps, joint angles, and tempo in real time.",
-      isAi: true 
-    },
-    { 
-      name: "TITAN AI", 
-      gender: "AI System",
-      spec: "Hypertrophy Overload Engine", 
-      availability: "Available 24/7 Live",
-      img: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop",
-      desc: "Dynamic resistance intelligence that adapts training volume to your daily neuromuscular fatigue.",
-      isAi: true 
     },
     { 
       name: "Marcus Johnson", 
       gender: "Male",
       spec: "Bodybuilding & Symmetry", 
+      experience: "9+ Years Coaching",
       availability: "Mon - Fri • 12PM - 9PM",
       img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format&fit=crop",
-      desc: "Sculpting muscular symmetry, competition conditioning, and targeted activation.",
+      desc: "Sculpting muscular symmetry, competition conditioning, and targeted muscle activation.",
       isAi: false 
     }
   ];
 
-  // Why FitFlow clean feature items
+  // Single Aura AI Coach (Titan removed from home page presentation)
+  const auraAiCoach = {
+    name: "AURA AI COACH",
+    title: "Intelligent Fitness & Form Assistant",
+    availability: "Available 24/7 Live",
+    version: "v2.5 Neural Engine",
+    img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop",
+    desc: "Aura is your 24/7 personal digital fitness assistant engineered to help you understand workouts, clarify athletic goals, structure customized exercise routines, and deliver real-time exercise guidance.",
+    capabilities: [
+      "Real-time Form & Biomechanical Guidance",
+      "Dynamic Exercise Routine Generation",
+      "Daily Hydration & Macro Guidance",
+      "Progressive Overload Recommendations"
+    ]
+  };
+
+  // Why FitFlow concise feature items
   const whyFitFlowFeatures = [
     {
       title: "Personalized Workout Plans",
-      desc: "Periodized training programs built directly around your fitness goals, weekly availability, and available equipment.",
+      desc: "Periodized training programs tailored to your athletic goals, gear, and weekly availability.",
       icon: Target,
       link: "/register"
     },
     {
       title: "Exercise Demonstrations",
-      desc: "Interactive 3D biomechanical models and muscle-highlighted anatomy diagrams ensure correct joint execution.",
+      desc: "Interactive 3D biomechanics and muscle-highlighted anatomy diagrams for flawless form.",
       icon: Play,
       link: "/dashboard/exercises"
     },
     {
       title: "Daily Fitness Tracking",
-      desc: "Record daily hydration, step goals, active minutes, and habit streaks with instant metric calculations.",
+      desc: "Record daily hydration, step goals, active minutes, and habit streaks with instant calculations.",
       icon: Activity,
       link: "/dashboard/routines"
     },
     {
       title: "Workout History",
-      desc: "Every completed exercise, set, repetition, and weight is logged to PostgreSQL persistence for lifelong tracking.",
+      desc: "Every exercise, set, rep, and weight is logged to PostgreSQL persistence for lifelong tracking.",
       icon: Calendar,
       link: "/dashboard/workout"
     },
     {
       title: "Progress Tracking",
-      desc: "Visualize your transformation through bodyweight charts, BMI metrics, and volume progression analytics.",
+      desc: "Visualize bodyweight trends, BMI shifts, and volume progression with analytical charts.",
       icon: BarChart3,
       link: "/dashboard/account"
     },
     {
       title: "AI Fitness Coaching",
-      desc: "24/7 intelligent coach dialogues providing form suggestions, tempo checks, and adaptive recovery advice.",
+      desc: "24/7 intelligent coach dialogues for instant workout guidance and form suggestions.",
       icon: Sparkles,
       link: "/trainers"
     }
@@ -315,7 +413,7 @@ export default function Home() {
       features: [
         "Everything in Silver Pass",
         "All Group Fitness & HIIT Classes",
-        "24/7 Access to AURA & TITAN AI Coaches",
+        "24/7 Access to Aura AI Coach",
         "Personalized Routine Builder",
         "1 Free Monthly Trainer Consultation",
         "Nutrition & Protein Target Dashboard"
@@ -359,13 +457,13 @@ export default function Home() {
           {/* Left: FIT in white and FLOW in bold red */}
           <button 
             onClick={() => scrollToSection('hero')}
-            className="flex items-center text-2xl sm:text-3xl font-black font-display tracking-[0.15em] text-white hover:opacity-95 transition-opacity"
+            className="flex items-center text-2xl sm:text-3xl font-black font-display tracking-[0.15em] text-white hover:opacity-95 transition-opacity cursor-pointer"
           >
             FIT<span className="text-[#ef233c] font-black">FLOW</span>
           </button>
 
-          {/* Center/Right Navigation: HOME, PROGRAMS, TRAINERS, LOGIN */}
-          <nav className="hidden md:flex items-center gap-8 lg:gap-10 text-xs font-bold tracking-widest uppercase text-gray-300">
+          {/* Center/Right Navigation: HOME, PROGRAMS, WHY FITFLOW, TRAINERS, AI COACH, LOGIN */}
+          <nav className="hidden md:flex items-center gap-7 lg:gap-9 text-xs font-bold tracking-widest uppercase text-gray-300">
             <button 
               onClick={() => scrollToSection('hero')} 
               className="text-white hover:text-[#ef233c] transition-colors cursor-pointer"
@@ -379,10 +477,23 @@ export default function Home() {
               PROGRAMS
             </button>
             <button 
+              onClick={() => scrollToSection('why-fitflow')} 
+              className="text-gray-300 hover:text-[#ef233c] transition-colors cursor-pointer"
+            >
+              WHY FITFLOW
+            </button>
+            <button 
               onClick={() => scrollToSection('trainers')} 
               className="text-gray-300 hover:text-[#ef233c] transition-colors cursor-pointer"
             >
               TRAINERS
+            </button>
+            <button 
+              onClick={() => scrollToSection('ai-coach')} 
+              className="text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <Bot className="w-3.5 h-3.5" />
+              <span>AI COACH</span>
             </button>
             {currentUser ? (
               <Link 
@@ -401,7 +512,7 @@ export default function Home() {
             )}
           </nav>
 
-          {/* Right: Red JOIN NOW button */}
+          {/* Right: Red JOIN NOW / DASHBOARD button */}
           <div className="hidden sm:flex items-center gap-3">
             <Link 
               to={currentUser ? "/dashboard/routines" : "/register"} 
@@ -415,7 +526,7 @@ export default function Home() {
           <button 
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-gray-300 hover:text-white focus:outline-none"
+            className="md:hidden p-2 text-gray-300 hover:text-white focus:outline-none cursor-pointer"
             aria-label="Toggle navigation menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6 text-[#ef233c]" /> : <Menu className="w-6 h-6" />}
@@ -427,21 +538,33 @@ export default function Home() {
           <div className="md:hidden bg-[#121318]/98 backdrop-blur-xl border-b border-white/10 px-6 py-6 space-y-4 text-xs font-bold uppercase tracking-widest shadow-2xl animate-in slide-in-from-top-2 duration-200">
             <button 
               onClick={() => scrollToSection('hero')} 
-              className="block w-full text-left text-white hover:text-[#ef233c] py-2 border-b border-white/5"
+              className="block w-full text-left text-white hover:text-[#ef233c] py-2 border-b border-white/5 cursor-pointer"
             >
               HOME
             </button>
             <button 
               onClick={() => scrollToSection('programs')} 
-              className="block w-full text-left text-gray-300 hover:text-[#ef233c] py-2 border-b border-white/5"
+              className="block w-full text-left text-gray-300 hover:text-[#ef233c] py-2 border-b border-white/5 cursor-pointer"
             >
               PROGRAMS
             </button>
             <button 
+              onClick={() => scrollToSection('why-fitflow')} 
+              className="block w-full text-left text-gray-300 hover:text-[#ef233c] py-2 border-b border-white/5 cursor-pointer"
+            >
+              WHY FITFLOW
+            </button>
+            <button 
               onClick={() => scrollToSection('trainers')} 
-              className="block w-full text-left text-gray-300 hover:text-[#ef233c] py-2 border-b border-white/5"
+              className="block w-full text-left text-gray-300 hover:text-[#ef233c] py-2 border-b border-white/5 cursor-pointer"
             >
               TRAINERS
+            </button>
+            <button 
+              onClick={() => scrollToSection('ai-coach')} 
+              className="block w-full text-left text-cyan-400 hover:text-cyan-300 py-2 border-b border-white/5 cursor-pointer"
+            >
+              AI COACH (AURA)
             </button>
             {currentUser ? (
               <Link 
@@ -474,40 +597,52 @@ export default function Home() {
       </header>
 
       {/* ======================================================== */}
-      {/* 2. HERO SECTION (Matching Screenshot 1)                  */}
+      {/* 2. HERO SECTION (1-Second Smooth Slideshow Background)    */}
       {/* ======================================================== */}
       <section id="hero" className="relative min-h-[96vh] flex items-center overflow-hidden bg-[#0b0c10]">
         
-        {/* Cinematic high-resolution gym hero background */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ 
-            backgroundImage: "url('/hero-gym-fitness.jpg')" 
-          }}
-        ></div>
+        {/* Automatic crossfade background image slideshow (1000ms rotation) */}
+        {HERO_IMAGES.map((imgSrc, idx) => (
+          <div 
+            key={imgSrc}
+            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700 ease-in-out pointer-events-none ${
+              idx === heroIndex ? 'opacity-100 z-[1]' : 'opacity-0 z-0'
+            }`}
+            style={{ 
+              backgroundImage: `url('${imgSrc}')` 
+            }}
+            aria-hidden="true"
+          />
+        ))}
 
-        {/* Dark gradient overlays leaving dark negative space on left */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0b0c10] via-[#0b0c10]/85 sm:via-[#0b0c10]/55 to-transparent"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0c10] via-transparent to-[#0b0c10]/60"></div>
+        {/* Dark gradient overlays leaving dark negative space on left & ensuring high contrast text readability */}
+        <div className="absolute inset-0 z-[2] bg-gradient-to-r from-[#0b0c10] via-[#0b0c10]/85 sm:via-[#0b0c10]/55 to-transparent pointer-events-none"></div>
+        <div className="absolute inset-0 z-[2] bg-gradient-to-t from-[#0b0c10] via-transparent to-[#0b0c10]/60 pointer-events-none"></div>
 
-        {/* Content Container (Left-aligned) */}
+        {/* Content Container (Left-aligned & stable during background rotation) */}
         <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 pt-32 sm:pt-36 pb-24 sm:pb-32 w-full">
           <div className="max-w-3xl">
             
+            {/* Live slideshow indicator pill */}
+            <div className="inline-flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-gray-300 mb-6">
+              <span className="w-2 h-2 rounded-full bg-[#ef233c] animate-pulse"></span>
+              <span>DYNAMIC FITFLOW EXPERIENCE • FRAME {heroIndex + 1}/{HERO_IMAGES.length}</span>
+            </div>
+
             {/* Headline */}
             <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[5.5rem] xl:text-[6.2rem] font-display font-black uppercase tracking-tight leading-[0.92] mb-6">
-              <span className="block text-white">TRAIN SMARTER.</span>
-              <span className="block text-[#ef233c]">LIVE STRONGER.</span>
+              <span className="block text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">TRAIN SMARTER.</span>
+              <span className="block text-[#ef233c] drop-shadow-[0_4px_24px_rgba(239,35,60,0.4)]">LIVE STRONGER.</span>
             </h1>
 
             {/* Supporting Text with Red Accent Bar */}
             <div className="border-l-[3px] border-[#ef233c] pl-4 sm:pl-5 mb-10 max-w-xl">
-              <p className="text-xs sm:text-sm md:text-base font-semibold tracking-wider uppercase text-gray-300 leading-relaxed">
+              <p className="text-xs sm:text-sm md:text-base font-semibold tracking-wider uppercase text-gray-300 leading-relaxed drop-shadow-md">
                 YOUR PERSONALIZED FITNESS JOURNEY FOR<br className="hidden sm:inline" /> GYM AND HOME WORKOUTS.
               </p>
             </div>
 
-            {/* Two Buttons: 1. Solid Red with Right Arrow, 2. Dark with Thin Red Border */}
+            {/* Two CTA Buttons */}
             <div className="flex flex-wrap items-center gap-4">
               <Link 
                 to="/register" 
@@ -519,7 +654,7 @@ export default function Home() {
 
               <button 
                 onClick={() => scrollToSection('programs')} 
-                className="bg-[#14151b]/60 hover:bg-[#ef233c]/15 border border-[#ef233c] text-white font-black uppercase tracking-widest text-xs sm:text-sm px-8 py-4 rounded-full transition-all duration-300 flex items-center gap-2 hover:-translate-y-0.5 backdrop-blur-sm cursor-pointer"
+                className="bg-[#14151b]/70 hover:bg-[#ef233c]/20 border border-[#ef233c] text-white font-black uppercase tracking-widest text-xs sm:text-sm px-8 py-4 rounded-full transition-all duration-300 flex items-center gap-2 hover:-translate-y-0.5 backdrop-blur-sm cursor-pointer"
               >
                 <span>EXPLORE PROGRAMS</span>
               </button>
@@ -530,50 +665,77 @@ export default function Home() {
 
         {/* Angular red decorative shape at bottom-right */}
         <div 
-          className="hidden sm:block absolute -bottom-1 -right-1 w-64 md:w-80 lg:w-[28rem] h-24 md:h-32 lg:h-38 bg-[#ef233c] pointer-events-none" 
+          className="hidden sm:block absolute -bottom-1 -right-1 w-64 md:w-80 lg:w-[28rem] h-24 md:h-32 lg:h-38 bg-[#ef233c] pointer-events-none z-[3]" 
           style={{ clipPath: 'polygon(30% 0, 100% 0, 100% 100%, 0 100%)' }}
         ></div>
       </section>
 
       {/* ======================================================== */}
-      {/* 3. PROGRAMS SECTION (#programs)                          */}
+      {/* 3. PROGRAMS SECTION (Clean Aligned Horizontal Row)        */}
       {/* ======================================================== */}
       <section id="programs" className="py-24 sm:py-32 bg-[#121318] border-t border-b border-white/5 relative">
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12">
           
-          {/* Section Header */}
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#ef233c] mb-3">
-              TRAINING PROTOCOLS
+          {/* Section Header with Left/Right Carousel Controls */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
+            <div>
+              <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#ef233c] mb-3">
+                TRAINING PROTOCOLS
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-display font-black uppercase tracking-tight text-white mb-2">
+                EXPLORE OUR PROGRAMS
+              </h2>
+              <div className="w-16 h-1 bg-[#ef233c] mb-3"></div>
+              <p className="text-gray-400 text-sm leading-relaxed max-w-xl">
+                Scientifically structured fitness regimens designed for progressive hypertrophy, strength, endurance, and longevity.
+              </p>
             </div>
-            <h2 className="text-4xl sm:text-5xl font-display font-black uppercase tracking-tight text-white mb-3">
-              EXPLORE OUR PROGRAMS
-            </h2>
-            <div className="w-16 h-1 bg-[#ef233c] mx-auto mb-4"></div>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Scientifically structured fitness regimens designed for progressive hypertrophy, strength, endurance, and longevity.
-            </p>
+            
+            {/* Desktop Horizontal Scroll Controls */}
+            <div className="hidden md:flex items-center gap-3 mt-6 md:mt-0">
+              <button 
+                type="button"
+                onClick={() => scrollPrograms('left')}
+                aria-label="Scroll programs left"
+                className="w-11 h-11 rounded-full bg-[#181920] border border-white/10 hover:border-[#ef233c] text-white hover:bg-[#ef233c] flex items-center justify-center transition-all shadow-md active:scale-95 cursor-pointer"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button 
+                type="button"
+                onClick={() => scrollPrograms('right')}
+                aria-label="Scroll programs right"
+                className="w-11 h-11 rounded-full bg-[#181920] border border-white/10 hover:border-[#ef233c] text-white hover:bg-[#ef233c] flex items-center justify-center transition-all shadow-md active:scale-95 cursor-pointer"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
-          {/* 8 Program Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Clean Horizontal Aligned Row */}
+          <div 
+            ref={programsScrollRef}
+            className="flex gap-6 overflow-x-auto pb-6 pt-2 scroll-smooth snap-x snap-mandatory no-scrollbar"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
             {programs.map((prog) => (
               <div 
                 key={prog.id}
-                className="group bg-[#181920] border border-white/5 hover:border-[#ef233c]/60 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between shadow-lg"
+                className="w-[280px] sm:w-[300px] md:w-[320px] shrink-0 snap-start bg-[#181920] border border-white/5 hover:border-[#ef233c]/60 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between shadow-lg group"
               >
-                {/* Photo Header */}
                 <div>
-                  <div className="relative h-48 w-full overflow-hidden bg-[#14151b]">
+                  <div className="relative h-44 w-full overflow-hidden bg-[#14151b]">
                     <img 
                       src={prog.image} 
                       alt={prog.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.src = "/hero/hero-2.jpg";
+                      }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#181920] via-black/40 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#181920] via-black/30 to-transparent"></div>
                     
-                    {/* Category & Duration Badges */}
                     <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-md border border-white/10 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-gray-200">
                       {prog.category}
                     </div>
@@ -582,17 +744,15 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Body Content */}
                   <div className="p-5">
-                    <h3 className="text-lg font-display font-bold uppercase tracking-wide text-white group-hover:text-[#ef233c] transition-colors mb-2">
+                    <h3 className="text-lg font-display font-bold uppercase tracking-wide text-white group-hover:text-[#ef233c] transition-colors mb-2 truncate">
                       {prog.title}
                     </h3>
-                    <p className="text-gray-400 text-xs leading-relaxed mb-4 min-h-[48px]">
+                    <p className="text-gray-400 text-xs leading-relaxed mb-4 line-clamp-2 min-h-[34px]">
                       {prog.desc}
                     </p>
 
-                    {/* Tag Pills */}
-                    <div className="flex flex-wrap gap-1.5 mb-2">
+                    <div className="flex flex-wrap gap-1.5 min-h-[26px]">
                       {prog.tags.map((tag, tIdx) => (
                         <span key={tIdx} className="text-[9px] font-bold uppercase tracking-wider bg-[#121318] border border-white/5 px-2 py-0.5 rounded text-gray-400">
                           {tag}
@@ -602,7 +762,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Card Action Link */}
                 <div className="px-5 pb-5 pt-3 border-t border-white/5">
                   <Link 
                     to="/register" 
@@ -618,8 +777,11 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Section Footer Link */}
-          <div className="mt-14 text-center">
+          {/* Section Footer */}
+          <div className="mt-12 text-center flex flex-col sm:flex-row items-center justify-center gap-4">
+            <span className="text-xs uppercase tracking-widest text-gray-400 font-semibold md:hidden">
+              ← Swipe horizontally to explore protocols →
+            </span>
             <Link 
               to="/programs" 
               className="inline-flex items-center gap-2 bg-[#181920] border border-white/10 hover:border-[#ef233c] text-white px-8 py-3.5 rounded-full uppercase tracking-widest font-bold text-xs transition-all hover:bg-[#ef233c]"
@@ -633,7 +795,7 @@ export default function Home() {
       </section>
 
       {/* ======================================================== */}
-      {/* 4. WHY FITFLOW SECTION (#why-fitflow)                     */}
+      {/* 4. WHY FITFLOW SECTION (Single Horizontal Row on Desktop)  */}
       {/* ======================================================== */}
       <section id="why-fitflow" className="py-24 sm:py-32 bg-[#0b0c10] relative">
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12">
@@ -651,33 +813,33 @@ export default function Home() {
             </p>
           </div>
 
-          {/* 6 Clean Feature Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* 6 Clean Feature Cards in a Single Horizontal Row on Desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {whyFitFlowFeatures.map((feat, idx) => {
               const Icon = feat.icon;
               return (
                 <div 
                   key={idx}
-                  className="bg-[#14151b] border border-white/5 hover:border-[#ef233c]/40 rounded-2xl p-7 transition-all duration-300 hover:-translate-y-1 group flex flex-col justify-between shadow-md"
+                  className="bg-[#14151b] border border-white/5 hover:border-[#ef233c]/40 rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1.5 group flex flex-col justify-between shadow-md"
                 >
                   <div>
-                    <div className="w-12 h-12 rounded-xl bg-[#ef233c]/15 text-[#ef233c] group-hover:bg-[#ef233c] group-hover:text-white flex items-center justify-center mb-5 transition-all shadow-sm">
-                      <Icon className="w-6 h-6" />
+                    <div className="w-11 h-11 rounded-xl bg-[#ef233c]/15 text-[#ef233c] group-hover:bg-[#ef233c] group-hover:text-white flex items-center justify-center mb-4 transition-all shadow-sm">
+                      <Icon className="w-5 h-5" />
                     </div>
-                    <h3 className="text-lg font-display font-bold uppercase tracking-wide text-white mb-2.5 group-hover:text-[#ef233c] transition-colors">
+                    <h3 className="text-xs sm:text-sm font-display font-bold uppercase tracking-wide text-white mb-2 leading-snug group-hover:text-[#ef233c] transition-colors min-h-[36px] flex items-center">
                       {feat.title}
                     </h3>
-                    <p className="text-gray-400 text-xs sm:text-sm leading-relaxed mb-6">
+                    <p className="text-gray-400 text-[11px] sm:text-xs leading-relaxed mb-4 min-h-[52px]">
                       {feat.desc}
                     </p>
                   </div>
                   
                   <Link 
                     to={feat.link} 
-                    className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-[#ef233c] transition-colors pt-3 border-t border-white/5"
+                    className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-gray-400 hover:text-[#ef233c] transition-colors pt-3 border-t border-white/5"
                   >
                     <span>Learn More</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <ChevronRight className="w-3 h-3" />
                   </Link>
                 </div>
               );
@@ -724,148 +886,96 @@ export default function Home() {
       </section>
 
       {/* ======================================================== */}
-      {/* 6. TRAINERS AND AI COACHES (#trainers)                   */}
+      {/* 6. OUR TRAINERS SECTION (4 Master Coaches in Single Row)   */}
       {/* ======================================================== */}
       <section id="trainers" className="py-24 sm:py-32 bg-[#121318] border-t border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12">
           
-          <div className="text-center max-w-2xl mx-auto mb-12">
+          <div className="text-center max-w-2xl mx-auto mb-14">
             <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#ef233c] mb-3">
-              MEET THE TEAM
+              EXPERT COACHING
             </div>
             <h2 className="text-4xl sm:text-5xl font-display font-black uppercase tracking-tight text-white mb-3">
-              OUR TRAINERS & AI COACHES
+              OUR TRAINERS
             </h2>
             <div className="w-16 h-1 bg-[#ef233c] mx-auto mb-4"></div>
             <p className="text-gray-400 text-sm leading-relaxed">
-              Certified master coaches and 24/7 computer vision AI trainers dedicated to your breakthrough. Select your ideal coach to power your workout plan.
+              Certified master coaches dedicated to your physical breakthrough. Select your ideal coach to power your workout plan.
             </p>
           </div>
 
-          {/* Filter Tabs */}
-          <div className="flex flex-wrap justify-center gap-3 mb-14">
-            <button 
-              type="button"
-              onClick={() => setTrainerTab('all')} 
-              className={`px-6 py-2.5 rounded-full uppercase font-bold text-xs tracking-widest transition-all cursor-pointer ${
-                trainerTab === 'all' 
-                  ? 'bg-[#ef233c] text-white shadow-[0_4px_16px_rgba(239,35,60,0.4)]' 
-                  : 'bg-[#181920] text-gray-400 border border-white/10 hover:border-white/30 hover:text-white'
-              }`}
-            >
-              All Trainers
-            </button>
-            <button 
-              type="button"
-              onClick={() => setTrainerTab('human')} 
-              className={`px-6 py-2.5 rounded-full uppercase font-bold text-xs tracking-widest transition-all cursor-pointer ${
-                trainerTab === 'human' 
-                  ? 'bg-[#ef233c] text-white shadow-[0_4px_16px_rgba(239,35,60,0.4)]' 
-                  : 'bg-[#181920] text-gray-400 border border-white/10 hover:border-white/30 hover:text-white'
-              }`}
-            >
-              Master Coaches
-            </button>
-            <button 
-              type="button"
-              onClick={() => setTrainerTab('ai')} 
-              className={`px-6 py-2.5 rounded-full uppercase font-bold text-xs tracking-widest transition-all flex items-center gap-2 cursor-pointer ${
-                trainerTab === 'ai' 
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_4px_20px_rgba(6,182,212,0.5)]' 
-                  : 'bg-[#101b2b] text-cyan-400 border border-cyan-500/30 hover:border-cyan-400 hover:text-white'
-              }`}
-            >
-              <Bot className="w-4 h-4 text-cyan-300" />
-              <span>AI Trainers (24/7)</span>
-            </button>
-          </div>
+          {/* 4 Master Trainers in a Single Horizontal Row on Desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {humanTrainers.map((trainer, i) => (
+              <div 
+                key={i} 
+                className="bg-[#14151b] border border-white/5 hover:border-[#ef233c]/50 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 group flex flex-col justify-between shadow-lg"
+              >
+                {/* Photo Container */}
+                <div className="w-full aspect-[4/5] overflow-hidden relative bg-[#181920]">
+                  <img 
+                    src={trainer.img} 
+                    alt={trainer.name} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.src = "/hero/hero-5.jpg";
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#14151b] via-transparent to-transparent"></div>
 
-          {/* Trainers Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {allTrainers
-              .filter(t => {
-                if (trainerTab === 'ai') return t.isAi;
-                if (trainerTab === 'human') return !t.isAi;
-                return true;
-              })
-              .map((trainer, i) => (
-                <div 
-                  key={i} 
-                  className="bg-[#14151b] border border-white/5 hover:border-[#ef233c]/50 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 group flex flex-col justify-between shadow-lg"
-                >
-                  {/* Photo Container */}
-                  <div className="w-full aspect-[4/5] overflow-hidden relative bg-[#181920]">
-                    <img 
-                      src={trainer.img} 
-                      alt={trainer.name} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#14151b] via-transparent to-transparent"></div>
-
-                    {/* Top Badges: Type & Gender */}
-                    <div className="absolute top-4 left-4 flex flex-col gap-1.5">
-                      {trainer.isAi ? (
-                        <span className="bg-cyan-950/90 border border-cyan-400/60 text-cyan-300 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 backdrop-blur-md shadow-lg">
-                          <Bot className="w-3.5 h-3.5 text-cyan-400" /> AI Coach • 24/7
-                        </span>
-                      ) : (
-                        <span className="bg-black/80 border border-white/10 text-gray-200 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md">
-                          Master Coach
-                        </span>
-                      )}
-                      <span className="bg-black/60 border border-white/10 text-gray-300 px-2.5 py-0.5 rounded-full text-[9px] font-semibold tracking-wider uppercase backdrop-blur-sm self-start">
-                        {trainer.gender}
-                      </span>
-                    </div>
-
-                    {/* Availability Tag */}
-                    <div className="absolute bottom-3 right-3 bg-black/80 border border-white/10 text-[10px] font-semibold text-gray-300 px-2.5 py-1 rounded-lg backdrop-blur-md">
-                      {trainer.availability}
-                    </div>
+                  {/* Top Badges */}
+                  <div className="absolute top-3 left-3 flex flex-col gap-1">
+                    <span className="bg-black/80 border border-white/10 text-gray-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md">
+                      Master Coach
+                    </span>
+                    <span className="bg-black/60 border border-white/10 text-gray-300 px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wider uppercase backdrop-blur-sm self-start">
+                      {trainer.gender} • {trainer.experience}
+                    </span>
                   </div>
 
-                  {/* Info */}
-                  <div className="p-6 flex-1 flex flex-col justify-between text-center">
-                    <div>
-                      <h3 className="text-xl font-display font-bold uppercase tracking-wide text-white flex items-center justify-center gap-1.5">
-                        {trainer.name}
-                        {trainer.isAi && <Sparkles className="w-4 h-4 text-cyan-400" />}
-                      </h3>
-                      <div className={`text-xs uppercase tracking-widest mt-1 font-bold ${
-                        trainer.isAi ? 'text-cyan-400' : 'text-[#ef233c]'
-                      }`}>
-                        {trainer.spec}
-                      </div>
-                      <p className="text-gray-400 text-xs mt-3 leading-relaxed">
-                        {trainer.desc}
-                      </p>
-                    </div>
-
-                    {/* Action */}
-                    <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-gray-500">
-                        <TwitterIcon className="w-3.5 h-3.5 hover:text-[#ef233c] cursor-pointer transition-colors" />
-                        <FacebookIcon className="w-3.5 h-3.5 hover:text-[#ef233c] cursor-pointer transition-colors" />
-                        <InstagramIcon className="w-3.5 h-3.5 hover:text-[#ef233c] cursor-pointer transition-colors" />
-                      </div>
-                      <Link 
-                        to="/trainers" 
-                        className={`text-xs uppercase font-bold tracking-wider inline-flex items-center gap-1 transition-colors ${
-                          trainer.isAi ? 'text-cyan-400 hover:text-cyan-300' : 'text-[#ef233c] hover:text-white'
-                        }`}
-                      >
-                        <span>View Profile</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </Link>
-                    </div>
+                  {/* Availability Tag */}
+                  <div className="absolute bottom-3 right-3 bg-black/80 border border-white/10 text-[10px] font-semibold text-gray-300 px-2.5 py-1 rounded-lg backdrop-blur-md">
+                    {trainer.availability}
                   </div>
-
                 </div>
-              ))}
+
+                {/* Info */}
+                <div className="p-5 flex-1 flex flex-col justify-between text-center">
+                  <div>
+                    <h3 className="text-lg font-display font-bold uppercase tracking-wide text-white">
+                      {trainer.name}
+                    </h3>
+                    <div className="text-xs uppercase tracking-wider mt-1 font-bold text-[#ef233c] min-h-[30px] flex items-center justify-center">
+                      {trainer.spec}
+                    </div>
+                    <p className="text-gray-400 text-xs mt-2.5 leading-relaxed min-h-[48px] line-clamp-3">
+                      {trainer.desc}
+                    </p>
+                  </div>
+
+                  {/* Action */}
+                  <div className="mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5 text-gray-500">
+                      <TwitterIcon className="w-3.5 h-3.5 hover:text-[#ef233c] cursor-pointer transition-colors" />
+                      <FacebookIcon className="w-3.5 h-3.5 hover:text-[#ef233c] cursor-pointer transition-colors" />
+                      <InstagramIcon className="w-3.5 h-3.5 hover:text-[#ef233c] cursor-pointer transition-colors" />
+                    </div>
+                    <Link 
+                      to="/trainers" 
+                      className="text-xs uppercase font-bold tracking-wider inline-flex items-center gap-1 text-[#ef233c] hover:text-white transition-colors"
+                    >
+                      <span>View Profile</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+
+              </div>
+            ))}
           </div>
 
-          <div className="mt-14 text-center">
+          <div className="mt-12 text-center">
             <Link 
               to="/trainers" 
               className="inline-flex items-center gap-2 bg-[#181920] border border-white/10 hover:border-[#ef233c] text-white px-8 py-3.5 rounded-full uppercase tracking-widest font-bold text-xs transition-all hover:bg-[#ef233c]"
@@ -879,7 +989,145 @@ export default function Home() {
       </section>
 
       {/* ======================================================== */}
-      {/* 7. PRICING PLANS SECTION                                 */}
+      {/* 7. AI COACHES SECTION (Single Aura AI Coach Presentation)  */}
+      {/* ======================================================== */}
+      <section id="ai-coach" className="py-24 sm:py-32 bg-[#0b0c10] border-b border-white/5 relative overflow-hidden">
+        {/* Ambient glowing accent */}
+        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 relative z-10">
+          
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <div className="inline-flex items-center gap-2 bg-cyan-950/80 border border-cyan-400/40 text-cyan-400 px-3.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest mb-3">
+              <Bot className="w-3.5 h-3.5 text-cyan-400" />
+              <span>INTELLIGENT ATHLETIC ASSISTANCE</span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-display font-black uppercase tracking-tight text-white mb-3">
+              AI COACHES
+            </h2>
+            <div className="w-16 h-1 bg-cyan-500 mx-auto mb-4"></div>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Meet Aura, your 24/7 intelligent coach providing workout guidance, exercise form insights, and adaptive routines.
+            </p>
+          </div>
+
+          {/* Unified Single Aura AI Coach Presentation Card on Desktop */}
+          <div className="bg-gradient-to-r from-[#14151b] via-[#151c24] to-[#14151b] border border-cyan-500/30 hover:border-cyan-400/60 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-[0_8px_35px_rgba(6,182,212,0.12)] transition-all duration-300">
+            <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+              
+              {/* Left: Avatar & Live Status Badge */}
+              <div className="w-full sm:w-72 lg:w-80 shrink-0">
+                <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-[#181920] border border-cyan-500/40 shadow-xl group">
+                  <img 
+                    src={auraAiCoach.img} 
+                    alt={auraAiCoach.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0b0c10] via-transparent to-transparent"></div>
+                  
+                  {/* Live Status Indicator */}
+                  <div className="absolute top-4 left-4 bg-cyan-950/90 border border-cyan-400/60 text-cyan-300 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 backdrop-blur-md shadow-lg">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                    <span>24/7 LIVE AI SYSTEM</span>
+                  </div>
+
+                  <div className="absolute bottom-3 left-3 right-3 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl p-2.5 text-center">
+                    <p className="text-[11px] font-bold text-cyan-300 uppercase tracking-wider">AURA v2.5</p>
+                    <p className="text-[10px] text-gray-400">Intelligent Biomechanical Engine</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Center: Information, Description & Feature Tags */}
+              <div className="flex-1 text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 text-cyan-400 text-xs font-bold uppercase tracking-widest mb-2">
+                  <Sparkles className="w-4 h-4" />
+                  <span>FITFLOW ARTIFICIAL INTELLIGENCE</span>
+                </div>
+
+                <h3 className="text-3xl sm:text-4xl font-display font-black uppercase tracking-wide text-white mb-2">
+                  {auraAiCoach.name}
+                </h3>
+
+                <div className="text-sm font-bold uppercase tracking-widest text-cyan-400 mb-4">
+                  {auraAiCoach.title}
+                </div>
+
+                <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-6 max-w-2xl">
+                  {auraAiCoach.desc}
+                </p>
+
+                {/* Feature Tags in a clean horizontal flex on desktop */}
+                <div className="flex flex-wrap gap-2 justify-center lg:justify-start mb-8">
+                  {auraAiCoach.capabilities.map((cap, cIdx) => (
+                    <span 
+                      key={cIdx} 
+                      className="bg-[#101b2b] border border-cyan-500/30 text-cyan-300 text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5"
+                    >
+                      <Check className="w-3 h-3 text-cyan-400" />
+                      <span>{cap}</span>
+                    </span>
+                  ))}
+                </div>
+
+                {/* Action Row */}
+                <div className="flex flex-wrap items-center gap-4 justify-center lg:justify-start pt-4 border-t border-white/10">
+                  <button 
+                    type="button"
+                    onClick={() => setIsAiChatOpen(true)}
+                    className="bg-gradient-to-r from-[#ef233c] to-[#d90429] hover:from-[#d90429] hover:to-[#b7094c] text-white px-8 py-3.5 rounded-full font-bold uppercase tracking-wider text-xs transition-all shadow-[0_4px_20px_rgba(239,35,60,0.5)] flex items-center gap-2 hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Chat with Aura AI</span>
+                  </button>
+
+                  <Link 
+                    to="/trainers" 
+                    className="bg-[#181920] hover:bg-[#20212a] border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 px-6 py-3.5 rounded-full font-bold uppercase tracking-wider text-xs transition-all flex items-center gap-2"
+                  >
+                    <span>Explore AI Directory</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+
+                {/* Quick Prompts */}
+                <div className="mt-5 text-center lg:text-left">
+                  <span className="text-[11px] uppercase tracking-wider text-gray-400 font-bold mr-2">Try asking:</span>
+                  <div className="inline-flex flex-wrap gap-2 mt-2 sm:mt-0">
+                    <button 
+                      type="button"
+                      onClick={() => handleQuickPrompt("What exercises build chest width?")}
+                      className="text-[11px] text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                    >
+                      "Chest exercises?"
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => handleQuickPrompt("How much water should I drink daily?")}
+                      className="text-[11px] text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                    >
+                      "Hydration goals?"
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => handleQuickPrompt("Suggest a beginner strength routine")}
+                      className="text-[11px] text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                    >
+                      "Beginner routine?"
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ======================================================== */}
+      {/* 8. PRICING PLANS SECTION                                 */}
       {/* ======================================================== */}
       <section id="pricing" className="py-24 sm:py-32 bg-[#0b0c10] border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12">
@@ -974,10 +1222,9 @@ export default function Home() {
       </section>
 
       {/* ======================================================== */}
-      {/* 8. STRONG RED-AND-BLACK CALL TO ACTION SECTION           */}
+      {/* 9. STRONG RED-AND-BLACK CALL TO ACTION SECTION           */}
       {/* ======================================================== */}
       <section className="relative py-24 sm:py-28 bg-gradient-to-r from-[#14151b] via-[#1f1013] to-[#0b0c10] border-t border-b border-[#ef233c]/20 overflow-hidden">
-        {/* Subtle decorative glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#ef233c]/15 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="max-w-5xl mx-auto px-6 sm:px-10 text-center relative z-10">
@@ -1014,7 +1261,7 @@ export default function Home() {
       </section>
 
       {/* ======================================================== */}
-      {/* 9. FOOTER SECTION                                        */}
+      {/* 10. FOOTER SECTION                                       */}
       {/* ======================================================== */}
       <footer className="bg-[#0b0c10] border-t border-white/10 pt-16 pb-12 text-gray-400 text-xs">
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12">
@@ -1054,10 +1301,10 @@ export default function Home() {
               <ul className="space-y-2.5">
                 <li><button onClick={() => scrollToSection('hero')} className="hover:text-[#ef233c] transition-colors cursor-pointer">Home</button></li>
                 <li><button onClick={() => scrollToSection('programs')} className="hover:text-[#ef233c] transition-colors cursor-pointer">Programs</button></li>
+                <li><button onClick={() => scrollToSection('why-fitflow')} className="hover:text-[#ef233c] transition-colors cursor-pointer">Why FitFlow</button></li>
                 <li><button onClick={() => scrollToSection('trainers')} className="hover:text-[#ef233c] transition-colors cursor-pointer">Trainers</button></li>
+                <li><button onClick={() => scrollToSection('ai-coach')} className="hover:text-cyan-400 transition-colors cursor-pointer">AI Coach (Aura)</button></li>
                 <li><Link to="/programs" className="hover:text-[#ef233c] transition-colors">All Protocols</Link></li>
-                <li><Link to="/login" className="hover:text-[#ef233c] transition-colors">Login</Link></li>
-                <li><Link to="/register" className="hover:text-[#ef233c] transition-colors">Join Now</Link></li>
               </ul>
             </div>
 
@@ -1131,7 +1378,79 @@ export default function Home() {
       </footer>
 
       {/* ======================================================== */}
-      {/* LEGAL MODAL (PRIVACY POLICY & TERMS OF SERVICE)          */}
+      {/* 11. INTERACTIVE AURA AI COACH DIALOG MODAL                */}
+      {/* ======================================================== */}
+      {isAiChatOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+          <div className="bg-[#14151b] border border-cyan-500/40 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="p-4 bg-[#181920] border-b border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-md">
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#181920]"></span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold font-display uppercase tracking-wide text-white flex items-center gap-1.5">
+                    <span>Aura AI Coach</span>
+                    <Bot className="w-3.5 h-3.5 text-cyan-400" />
+                  </h3>
+                  <p className="text-[11px] text-cyan-400 font-semibold">● 24/7 Intelligent Fitness Assistant</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAiChatOpen(false)}
+                className="p-1.5 text-gray-400 hover:text-white rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Chat content */}
+            <div className="p-4 overflow-y-auto space-y-3 flex-1 min-h-[280px]">
+              {aiMessages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed ${
+                      msg.role === 'user'
+                        ? 'bg-[#ef233c] text-white rounded-br-sm shadow-md font-medium'
+                        : 'bg-[#181920] text-gray-200 border border-white/5 rounded-bl-sm'
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Input Form */}
+            <form onSubmit={handleAiSend} className="p-3 border-t border-white/5 bg-[#181920] flex gap-2">
+              <input
+                type="text"
+                value={aiInput}
+                onChange={(e) => setAiInput(e.target.value)}
+                placeholder="Ask Aura about routines, exercises, chest, hydration..."
+                className="flex-1 bg-[#121318] border border-white/10 rounded-full px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition-colors"
+              />
+              <button
+                type="submit"
+                className="bg-cyan-500 hover:bg-cyan-400 text-black px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <Send className="w-3.5 h-3.5" />
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* 12. LEGAL MODAL (PRIVACY POLICY & TERMS OF SERVICE)       */}
       {/* ======================================================== */}
       {legalModal && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
@@ -1141,8 +1460,9 @@ export default function Home() {
                 {legalModal === 'privacy' ? 'FitFlow Privacy Policy' : 'FitFlow Terms of Service'}
               </h3>
               <button 
+                type="button"
                 onClick={() => setLegalModal(null)}
-                className="p-1.5 text-gray-400 hover:text-white rounded-full hover:bg-white/10 transition-colors"
+                className="p-1.5 text-gray-400 hover:text-white rounded-full hover:bg-white/10 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1151,7 +1471,7 @@ export default function Home() {
             {legalModal === 'privacy' ? (
               <div className="space-y-4 text-xs sm:text-sm text-gray-300 leading-relaxed">
                 <p><strong>1. Data Collection:</strong> FitFlow collects user-provided fitness metrics, daily hydration logs, workout session records, and account credentials to generate personalized athletic recommendations.</p>
-                <p><strong>2. Biometric and AI Processing:</strong> Any form correction, computer vision estimation, or workout calculations processed by AURA AI or TITAN AI are encrypted and used strictly for athletic telemetry.</p>
+                <p><strong>2. Biometric and AI Processing:</strong> Any form correction, computer vision estimation, or workout calculations processed by Aura AI Coach are encrypted and used strictly for athletic telemetry.</p>
                 <p><strong>3. Data Security:</strong> User records and authentication tokens are secured with industry-standard bcrypt encryption and stored in dedicated PostgreSQL instances.</p>
                 <p><strong>4. User Control:</strong> You maintain full control over your workout history and may request data export or account closure through your Account Dashboard.</p>
               </div>
@@ -1166,8 +1486,9 @@ export default function Home() {
 
             <div className="mt-6 pt-4 border-t border-white/10 text-right">
               <button 
+                type="button"
                 onClick={() => setLegalModal(null)}
-                className="bg-[#ef233c] hover:bg-[#d90429] text-white px-6 py-2 rounded-full font-bold uppercase tracking-wider text-xs transition-colors"
+                className="bg-[#ef233c] hover:bg-[#d90429] text-white px-6 py-2 rounded-full font-bold uppercase tracking-wider text-xs transition-colors cursor-pointer"
               >
                 Close
               </button>

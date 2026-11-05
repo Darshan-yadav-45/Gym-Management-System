@@ -67,7 +67,7 @@ export default function Programs() {
       duration: "10 Weeks",
       schedule: "4 Days/Wk",
       desc: "Rotational power, kinetic agility, reactive plyometrics, and multidirectional sprint acceleration.",
-      image: "https://images.unsplash.com/photo-1526506114642-54a0fc0c213c?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1517963879433-6ad2b056d712?q=80&w=800&auto=format&fit=crop",
       tags: ["Agility", "Plyometrics", "Speed"]
     },
     {
