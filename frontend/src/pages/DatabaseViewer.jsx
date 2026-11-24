@@ -11,7 +11,8 @@ export default function DatabaseViewer() {
   const [error, setError] = useState(null);
 
   // Use the standard backend API URL, default to localhost:8080 if not specified
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+  const rawApiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080';
+  const API_URL = rawApiUrl.replace(/\/+$/, '').replace(/\/api$/, '');
 
   useEffect(() => {
     fetchTables();

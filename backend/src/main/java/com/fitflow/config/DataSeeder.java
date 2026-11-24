@@ -131,8 +131,9 @@ public class DataSeeder implements CommandLineRunner {
             log.info("Configured admin {} verified and role/password updated.", normalizedAdminEmail);
         }
 
-        // 2. Default Trainer (if missing)
-        if (userRepository.findByEmail("trainer@fitflow.com").isEmpty()) {
+        // 2. Default Trainer (if missing or existing)
+        var existingTrainer = userRepository.findByEmail("trainer@fitflow.com");
+        if (existingTrainer.isEmpty()) {
             User trainer = User.builder()
                     .name("Trainer User")
                     .email("trainer@fitflow.com")
@@ -140,15 +141,23 @@ public class DataSeeder implements CommandLineRunner {
                     .role(Role.TRAINER)
                     .build();
             userRepository.save(trainer);
+        } else {
+            User trainer = existingTrainer.get();
+            trainer.setPassword(passwordEncoder.encode("trainer123"));
+            trainer.setRole(Role.TRAINER);
+            trainer.setEnabled(true);
+            userRepository.save(trainer);
         }
 
-        // 3. Default Member (if missing)
-        if (userRepository.findByEmail("member@fitflow.com").isEmpty()) {
+        // 3. Default Member (if missing or existing)
+        var existingMember = userRepository.findByEmail("member@fitflow.com");
+        if (existingMember.isEmpty()) {
             User member = User.builder()
                     .name("Member User")
                     .email("member@fitflow.com")
                     .password(passwordEncoder.encode("member123"))
                     .role(Role.MEMBER)
+                    .enabled(true)
                     .build();
             member = userRepository.save(member);
 
@@ -161,6 +170,27 @@ public class DataSeeder implements CommandLineRunner {
                     .startDate(LocalDate.now())
                     .build();
             subscriptionRepository.save(sub);
+        } else {
+            User member = existingMember.get();
+            member.setPassword(passwordEncoder.encode("member123"));
+            member.setRole(Role.MEMBER);
+            member.setEnabled(true);
+            member = userRepository.save(member);
+
+            if (fitnessProfileRepository.findByUserId(member.getId()).isEmpty()) {
+                FitnessProfile profile = FitnessProfile.builder()
+                        .user(member)
+                        .fitnessGoal(FitnessGoal.BUILD_MUSCLE)
+                        .experienceLevel(ExperienceLevel.INTERMEDIATE)
+                        .age(25)
+                        .gender(Gender.MALE)
+                        .heightCm(175.0)
+                        .weightKg(70.0)
+                        .bmi(22.9)
+                        .activityLevel(ActivityLevel.MODERATE)
+                        .build();
+                fitnessProfileRepository.save(profile);
+            }
         }
     }
 

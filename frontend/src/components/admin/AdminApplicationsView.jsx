@@ -29,6 +29,9 @@ import {
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 
+const rawApiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_URL = rawApiUrl.replace(/\/+$/, '').replace(/\/api$/, '');
+
 export default function AdminApplicationsView({ initialVacancyId = null, onNotify, onNavigateStaff }) {
   const [applications, setApplications] = useState([]);
   const [summary, setSummary] = useState(null);
@@ -610,7 +613,7 @@ export default function AdminApplicationsView({ initialVacancyId = null, onNotif
                   <span className="text-gray-400 block text-[10px] uppercase font-bold">Resume Document</span>
                   {selectedApp.resumeUrl ? (
                     <a
-                      href={`http://localhost:8080/api/admin/applications/${selectedApp.id}/resume`}
+                      href={`${API_URL}/api/admin/applications/${selectedApp.id}/resume`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-[#ef233c] hover:underline font-bold mt-0.5 inline-flex items-center gap-1"

@@ -117,9 +117,15 @@ export default function AdminSchedulesView({ onNotify }) {
     setSaving(true);
     setConflictWarning('');
 
+    const selectedDays = Array.isArray(formData.workingDays) && formData.workingDays.length > 0 
+      ? formData.workingDays 
+      : ['Monday'];
+    const primaryDay = selectedDays[0].toUpperCase();
+
     const payload = {
       ...formData,
-      workingDays: Array.isArray(formData.workingDays) ? formData.workingDays.join(', ') : formData.workingDays
+      dayOfWeek: primaryDay,
+      workingDays: selectedDays.join(', ')
     };
 
     try {
@@ -134,7 +140,8 @@ export default function AdminSchedulesView({ onNotify }) {
       loadSchedules();
     } catch (err) {
       const msg = err.response?.data?.message || 'Could not save schedule.';
-      if (msg.includes('Overlap') || msg.includes('conflict') || msg.includes('already assigned')) {
+      const lower = msg.toLowerCase();
+      if (lower.includes('overlap') || lower.includes('conflict') || lower.includes('already assigned')) {
         setConflictWarning(`Conflict Detected: ${msg}`);
       } else {
         onNotify?.(msg, 'error');
