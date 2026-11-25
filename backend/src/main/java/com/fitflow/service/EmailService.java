@@ -35,7 +35,7 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final EmailDeliveryLogRepository deliveryLogRepository;
 
-    @Value("${fitflow.mail.from-email:${spring.mail.username:appu12813@gmail.com}}")
+    @Value("${fitflow.mail.from-email:${spring.mail.username:admin@fitflow.com}}")
     private String fromEmail;
 
     @Value("${fitflow.mail.from-name:FitFlow}")
@@ -44,7 +44,7 @@ public class EmailService {
     @Value("${fitflow.mail.enabled:false}")
     private boolean emailEnabled;
 
-    @Value("${fitflow.mail.deadline-notification-emails:appu12813@gmail.com,yadavdarshan922@gmail.com,darshankm703@gmail.com,lakalkakaakaaa@gmail.com}")
+    @Value("${fitflow.mail.deadline-notification-emails:admin@fitflow.com}")
     private String deadlineNotificationEmails;
 
     // ── Notification type constants ─────────────────────────────────────────
@@ -164,12 +164,10 @@ public class EmailService {
 
     /**
      * Returns the list of configured deadline notification recipient addresses.
-     * Guaranteed to contain the requested recipient addresses:
-     * appu12813@gmail.com, yadavdarshan922@gmail.com, darshankm703@gmail.com, lakalkakaakaaa@gmail.com
      */
     public List<String> getDeadlineNotificationRecipients() {
         if (deadlineNotificationEmails == null || deadlineNotificationEmails.isBlank()) {
-            return List.of("appu12813@gmail.com", "yadavdarshan922@gmail.com", "darshankm703@gmail.com", "lakalkakaakaaa@gmail.com");
+            return List.of("admin@fitflow.com");
         }
         return Arrays.stream(deadlineNotificationEmails.split(","))
                 .map(String::trim)

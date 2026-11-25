@@ -39,10 +39,10 @@ public class DataSeeder implements CommandLineRunner {
     @Value("${fitflow.admin.seed-enabled:${ADMIN_SEED_ENABLED:true}}")
     private boolean adminSeedEnabled;
 
-    @Value("${fitflow.admin.email:${ADMIN_EMAIL:appu12813@gmail.com}}")
+    @Value("${fitflow.admin.email:${ADMIN_EMAIL:admin@fitflow.com}}")
     private String adminEmail;
 
-    @Value("${fitflow.admin.password:${ADMIN_INITIAL_PASSWORD:Lulu@3002}}")
+    @Value("${fitflow.admin.password:${ADMIN_INITIAL_PASSWORD:admin123}}")
     private String adminPassword;
 
     @Value("${fitflow.demo.seed-enabled:${DEMO_SEED_ENABLED:true}}")

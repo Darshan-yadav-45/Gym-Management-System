@@ -141,7 +141,7 @@ export default function Login() {
             </div>
 
             <div className="flex justify-between items-center text-xs">
-              <span className="text-gray-500">Seed Accounts: member@fitflow.com / appu12813@gmail.com</span>
+              <span className="text-gray-500">Demo Accounts: member@fitflow.com / admin@fitflow.com</span>
             </div>
 
             <button 

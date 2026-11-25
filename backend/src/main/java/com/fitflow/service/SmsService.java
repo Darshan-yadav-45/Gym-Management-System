@@ -35,7 +35,7 @@ public class SmsService {
     @Value("${fitflow.sms.from-number:}")
     private String fromNumber;
 
-    @Value("${fitflow.mail.from-email:${spring.mail.username:appu12813@gmail.com}}")
+    @Value("${fitflow.mail.from-email:${spring.mail.username:admin@fitflow.com}}")
     private String adminSenderEmail;
 
     /**

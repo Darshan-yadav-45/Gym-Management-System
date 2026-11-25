@@ -33,7 +33,7 @@ public class AdminEmailController {
     private final UserSubscriptionRepository subscriptionRepository;
     private final com.fitflow.service.SmsService smsService;
 
-    @org.springframework.beans.factory.annotation.Value("${fitflow.mail.from-email:${fitflow.admin.email:appu12813@gmail.com}}")
+    @org.springframework.beans.factory.annotation.Value("${fitflow.mail.from-email:${fitflow.admin.email:admin@fitflow.com}}")
     private String adminSenderEmail;
 
     /**

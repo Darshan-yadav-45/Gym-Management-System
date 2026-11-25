@@ -46,7 +46,7 @@ export default function AdminSettingsView({ currentUser }) {
           <div className="space-y-2 text-xs">
             <div className="p-3 bg-[#181920] rounded-xl border border-white/5 flex justify-between items-center">
               <span className="text-gray-400">Admin Username / Email:</span>
-              <span className="text-white font-mono font-bold">{currentUser?.email || 'appu12813@gmail.com'}</span>
+              <span className="text-white font-mono font-bold">{currentUser?.email || 'admin@fitflow.com'}</span>
             </div>
             <div className="p-3 bg-[#181920] rounded-xl border border-white/5 flex justify-between items-center">
               <span className="text-gray-400">Authentication Scheme:</span>
@@ -113,7 +113,7 @@ export default function AdminSettingsView({ currentUser }) {
           <div className="space-y-2 text-xs">
             <div className="p-3 bg-[#181920] rounded-xl border border-white/5 flex justify-between items-center">
               <span className="text-gray-400">Admin Email Identity:</span>
-              <span className="text-white font-mono font-bold">appu12813@gmail.com</span>
+              <span className="text-white font-mono font-bold">admin@fitflow.com</span>
             </div>
             <div className="p-3 bg-[#181920] rounded-xl border border-white/5 flex justify-between items-center">
               <span className="text-gray-400">SMTP Host / Port:</span>

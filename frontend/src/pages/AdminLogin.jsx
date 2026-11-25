@@ -145,7 +145,7 @@ export default function AdminLogin() {
                     value={formData.email}
                     onChange={handleChange}
                     className="w-full bg-[#0b0c10] border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white focus:outline-none focus:border-[#ef233c] transition-colors text-sm"
-                    placeholder="appu12813@gmail.com"
+                    placeholder="admin@fitflow.com"
                     autoComplete="username"
                     required
                   />

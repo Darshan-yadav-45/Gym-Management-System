@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: fitflow
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-Appu@1234}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
       - "5432:5432"
     volumes:
@@ -33,8 +33,8 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/fitflow
       SPRING_DATASOURCE_USERNAME: postgres
-      DB_PASSWORD: ${DB_PASSWORD:-Appu@1234}
-      JWT_SECRET: ${JWT_SECRET:-94a08da1fecbb6e8b46990538c7b50b2b800531bb8999a3845b4618e47854611}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      JWT_SECRET: ${JWT_SECRET:-your_secure_256_bit_jwt_secret_key_placeholder}
       SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USERNAME: ${SMTP_USERNAME:-}

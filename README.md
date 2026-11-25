@@ -1,4 +1,4 @@
-# FitFlow – Gym Management & Recruitment Intelligence System
+# FitFlow – Gym Management & Fitness Intelligence System
 
 [![Java](https://img.shields.io/badge/Java-21%20LTS-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
@@ -6,157 +6,136 @@
 [![React](https://img.shields.io/badge/React-18%2F19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-Modern%20Dark-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Hibernate](https://img.shields.io/badge/Hibernate-ORM%20JPA-59666C?style=for-the-badge&logo=hibernate&logoColor=white)](https://hibernate.org/)
+[![Vite](https://img.shields.io/badge/Vite-Bundler-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+
+> **FitFlow** is a modern full-stack gym management platform and athletic training system. It bridges member self-service (personalized routines, 3D exercises, and 24/7 AI coaching) with enterprise gym administration (membership subscription lifecycles, collision-free trainer scheduling, recruitment pipelines, and automated email alerts).
 
 ---
 
-## Academic Review Metadata
+## 🌐 Live Production Deployments
 
-- **Project Title:** FitFlow – Gym Management & Recruitment Intelligence System
-- **Candidate:** Java Full Stack Developer Intern
-- **Internship Organization:** Excerpt Technologies
-- **Internship Role:** Java Full Stack Developer Intern
-- **University:** CMR University, Bengaluru
-- **Faculty Guide:** Dr. Deepa A.
-- **Internship Period:** 19 August 2026 to 19 October 2026
-- **Project Domain:** Enterprise Health & Fitness Resource Planning (ERP)
-- **Application Status:** Working, fully functional full-stack application verified with live PostgreSQL persistence.
+| Component | Platform | URL |
+|---|---|---|
+| **Frontend Web App** | Vercel | [https://gym-management-system-sepia-chi.vercel.app/](https://gym-management-system-sepia-chi.vercel.app/) |
+| **Backend REST API** | Render | [https://fitflow-backend-qxvp.onrender.com](https://fitflow-backend-qxvp.onrender.com) |
+| **Database** | Neon Serverless PostgreSQL | AWS us-east-1 Cloud Instance |
 
 ---
 
-## 1. Project Introduction & Ready-to-Speak Pitches
+## ⚡ Quick Start (Run Locally in 5 Minutes)
 
-### 30-Second Elevator Pitch
-> *"Respected guide Dr. Deepa ma’am and honorable panel members, I present **FitFlow**, a cloud-ready Gym Management and Fitness Intelligence System developed during my internship at Excerpt Technologies. Built using **React.js, Spring Boot, Spring Security, and PostgreSQL**, FitFlow bridges the gap between everyday workout tracking for members and mission-critical gym operations—such as subscription lifecycles, trainer shift scheduling with collision detection, and coach recruitment—all protected by role-based JWT authentication."*
-
-### 1-Minute Project Overview
-> *"Traditional fitness centers face serious operational challenges: paper logs, missed subscription renewals, manual shift scheduling conflicts, and disorganized hiring channels for personal trainers. FitFlow solves this with a decoupled 3-tier architecture. On the frontend, a responsive React and Tailwind single-page application delivers a dark gym aesthetic. On the backend, Spring Boot 3.4 and Hibernate ORM enforce strict business validation and security over a PostgreSQL 17 relational database. The system features a Member Self-Service portal, an Admin Command Console with a 9-section sidebar, and a public career portal at `/careers/trainers` for talent recruitment."*
-
-### 2-Minute Complete Defense Script
-> *"Good morning, respected guide Dr. Deepa ma’am and panel members.
->
-> **The Problem:** Modern fitness centers manage hundreds of active members and dozens of trainers. Relying on disconnected spreadsheets causes revenue leakage from expired subscriptions, scheduling clashes between trainers, and loss of qualified coaching candidates.
->
-> **Our Solution:** FitFlow is a unified Java Full Stack ERP platform:
-> 1. **Client Tier:** React.js single-page application with Tailwind CSS, Axios interceptors, and client-side routing.
-> 2. **Security Tier:** Stateless Spring Security 6 with JSON Web Tokens (JWT) and Role-Based Access Control (`ROLE_MEMBER`, `ROLE_ADMIN`, `ROLE_TRAINER`), securing confidential trainer salaries and candidate resumes.
-> 3. **Persistence Tier:** Java 21, Spring Data JPA, and PostgreSQL 17, guaranteeing ACID compliance.
->
-> **Core Deliverables:**
-> - **Member Portal:** Fitness onboarding, BMI and caloric calculations, exercise database with 3D models, and subscription validity countdowns.
-> - **Admin Console:** Live KPI metrics, isolated member directory (separate from staff), shift rotas with server-side time conflict detection, and email deadline notifications.
-> - **Recruitment Pipeline:** Public careers portal (`/careers/trainers`) allowing prospective coaches to apply with resumes, which administrators review through a full status workflow (`SUBMITTED → INTERVIEW → SELECTED`) and convert into official staff records with one click.
->
-> All backend endpoints, entity relationships, and frontend views are verified and functional against live PostgreSQL data."*
+### Prerequisites
+- **Java:** JDK 21+
+- **Node.js:** v18+ or v20+
+- **Database:** PostgreSQL 14+ running locally on port `5432`
+- **Build Tool:** Apache Maven 3.8+
 
 ---
 
-## 2. Problem Statement & Proposed Solution
-
-| Operational Bottleneck in Traditional Gyms | How FitFlow Solves It |
-|---|---|
-| **Manual Member Registers:** Paper or Excel sheets cause data loss and lack audit trails. | Normalized PostgreSQL relational database with encrypted accounts and automated history tracking. |
-| **Subscription Revenue Leakage:** Gyms miss upcoming member expirations, delaying renewals. | Dynamic expiry calculation displaying remaining days (`remainingDays`) and 1-click email/SMS reminders. |
-| **Trainer Scheduling Collisions:** Double-booked personal training sessions damage customer satisfaction. | Algorithmic shift conflict check in the service layer preventing overlapping working hours for the same trainer. |
-| **Scattered Recruitment:** Coach resumes get lost in inboxes without evaluation stages. | Dedicated public careers portal (`/careers/trainers`) and admin candidate tracking pipeline with one-click staff conversion. |
+### Step 1: Database Setup
+Create a local database named `fitflow`:
+```sql
+CREATE DATABASE fitflow;
+```
 
 ---
 
-## 3. System Architecture & Request Lifecycle
+### Step 2: Start the Backend (Spring Boot)
+1. Open a terminal in the `backend/` folder:
+   ```bash
+   cd backend
+   mvn spring-boot:run
+   ```
+2. The backend starts at `http://localhost:8080`.
+3. Schema creation and demonstration seed data run automatically on startup.
 
-FitFlow is built on a **Decoupled 3-Tier Client-Server Architecture**:
+---
+
+### Step 3: Start the Frontend (React + Vite)
+1. Open a second terminal in the `frontend/` folder:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+2. Open your browser at `http://localhost:5173`.
+
+---
+
+## 🔑 Default Demonstration Accounts
+
+| Role | Email | Password | Access Rights |
+|---|---|---|---|
+| **System Administrator** | `admin@fitflow.com` | `admin123` | Full access to `/admin` dashboard, payroll, shift scheduling, candidate hiring, and email controls. |
+| **Personal Trainer** | `trainer@fitflow.com` | `trainer123` | Access to trainer schedules and client workout routines. |
+| **Gym Member** | `member@fitflow.com` | `member123` | Member self-service: personal workout plans, habit tracker, and membership overview. |
+
+---
+
+## 🚀 Key Features
+
+### 1. 📱 Mobile-First Responsive Experience
+- **Touch-Friendly Navigation Drawer:** Slide-out mobile menu with 48px tap targets, custom icons, dark backdrop dismissal, and keyboard `Escape` closing.
+- **Responsive Hero Section:** Dynamic headline typography, high-contrast dark overlay, and automatic background crossfade.
+- **Program Carousel:** Smooth horizontal swipe gestures on mobile with left/right carousel buttons on desktop.
+- **Scroll Lock:** Automatically locks background body scroll whenever menus or modals are open.
+
+### 2. 🏋️ Member Experience Portal
+- **Interactive Onboarding:** 10-step preference setup calculating Body Mass Index (BMI) and daily caloric targets.
+- **Exercise Library:** 3D muscle biomechanics diagrams and step-by-step form execution cues.
+- **Custom Workout Tracker:** Log sets, reps, weight, and hydration with PostgreSQL persistence.
+- **Subscription Transparency:** Real-time remaining day countdowns and renewal options.
+
+### 3. 🤖 Aura AI Coach (24/7 Intelligent Guidance)
+- **Interactive Coaching Dialog:** Dedicated modal assistant for instant workout splits, nutrition tips, and recovery advice.
+- **1-Click Quick Prompts:** Pre-configured athletic queries (*"Chest exercises?"*, *"Hydration goals?"*, *"Beginner routine?"*).
+
+### 4. 🛡️ Admin Command Console (`/admin`)
+- **Real-Time KPIs:** Live metric cards for total members, active subscriptions, expiring plans, and email deliveries.
+- **Shift Scheduling with Collision Detection:** Algorithmic check in `StaffService.java` that rejects overlapping working hours for the same trainer.
+- **Trainer Directory & Confidential Payroll:** Protected by Spring Security (`ROLE_ADMIN`), ensuring salaries are never exposed to public APIs.
+
+### 5. 💼 Public Careers & Recruitment Pipeline (`/careers/trainers`)
+- **Public Job Board:** Prospective coaches can view open vacancies without logging in.
+- **Candidate Application Form:** Multi-part application with resume upload (PDF/DOCX) and unique reference generation (`APP-YYYY-XXXX`).
+- **1-Click Staff Onboarding:** Administrators can review candidate statuses (`SUBMITTED → INTERVIEW → SELECTED`) and convert hired coaches directly into active staff records.
+
+### 6. 📧 Automated Email Notification Engine
+- **Welcome Email on Registration:** Immediately dispatched upon sign-up with dark/red branded HTML formatting.
+- **2-Day Expiry Reminder:** Automated daily cron scheduler at `08:05 AM` alerting members whose subscription expires in 2 days.
+- **Expired Membership Notice:** Automated daily cron scheduler at `08:10 AM` alerting lapsed members.
+- **Idempotency Guarantee:** Enforced via PostgreSQL unique constraints (`uq_email_log_user_type_date`) to prevent duplicate emails on restarts.
+- **Admin Management Panel:** Interactive interface with individual sends, multi-user select bulk actions, and 1-click retry on failed deliveries.
+
+---
+
+## 🏗️ System Architecture
 
 ```text
 [ CLIENT TIER ]
-   │  React.js Single-Page Application (Tailwind CSS, Component Architecture)
+   │  React.js Single-Page Application (Tailwind CSS, Lucide Icons, Vite)
    │  Axios HTTP Client with Authorization: Bearer <JWT> Interceptor
    ▼
-[ NETWORK / HTTP TIER ]
-   │  RESTful Endpoints: /api/auth/**, /api/admin/**, /api/careers/**
-   │  JSON Request / Response Payloads
-   ▼
 [ SECURITY & FILTER TIER ]
-   │  SecurityFilterChain (CORS Configured, CSRF Disabled for Stateless APIs)
-   │  JwtAuthenticationFilter (Token Signature Verification & Claims Extraction)
-   │  SecurityContextHolder (Populated with User Principal & Roles)
+   │  SecurityFilterChain (CORS Configured, Stateless Session)
+   │  JwtAuthenticationFilter (Validates Token Signature & Claims)
    ▼
 [ CONTROLLER LAYER ]
-   │  @RestController (AdminStaffController, PublicCareersController, etc.)
-   │  Input Validation (@Valid, DTO Mapping)
+   │  @RestController (Auth, Members, Staff, Recruitment, Email, Metrics)
+   │  DTO Validation (@Valid, Custom DTO Mappings)
    ▼
-[ SERVICE LAYER ]
-   │  @Service (StaffService, RecruitmentService, AuthService, EmailService)
-   │  Business Rules: Shift collision validation, vacancy quota computation
-   │  @Transactional Execution Boundaries
+[ SERVICE & BUSINESS LOGIC LAYER ]
+   │  @Service (StaffService, RecruitmentService, EmailService, AuthService)
+   │  Business Rules: Shift collision validation, vacancy quotas, idempotency
    ▼
-[ PERSISTENCE LAYER ]
-   │  Spring Data JPA Repositories (GymStaffRepository, JobVacancyRepository)
-   │  Hibernate ORM (HQL / SQL Generation, Entity Lifecycle Management)
-   ▼
-[ DATABASE TIER ]
-      PostgreSQL 17 Database (fitflow schema, Relational Constraints, WAL)
+[ PERSISTENCE & DATABASE TIER ]
+   │  Spring Data JPA / Hibernate 6.6
+   ▼  PostgreSQL 17 Relational Database (Relational Foreign Keys, Constraints)
 ```
 
-### End-to-End Request Journey:
-1. **Client Action:** The Administrator clicks **"Assign Shift"** in the Staff Schedules view.
-2. **HTTP Dispatch:** React dispatches a `POST /api/admin/staff-schedules` request with an `Authorization: Bearer <token>` header.
-3. **Filter Chain:** `JwtAuthenticationFilter` validates token signature and expiry, then authenticates the user as `ROLE_ADMIN`.
-4. **Controller Routing:** `AdminStaffController` receives the request and validates the DTO.
-5. **Business Logic:** `StaffService` runs `hasShiftOverlap()` to check if the staff member already has a shift on the specified day and time.
-6. **Data Persistence:** If valid, `StaffScheduleRepository.save()` executes SQL `INSERT INTO staff_schedules...`.
-7. **Client Update:** A `StaffScheduleDto` is returned with HTTP 201 Created, immediately updating the weekly rota without a page reload.
-
 ---
 
-## 4. Key Modules & Functional Overview
-
-### 4.1. Admin Dashboard (9-Section Navigation)
-1. **Overview:** Live platform analytics, member/subscription stats, recruitment status, and quick-action shortcuts.
-2. **Members:** Dedicated gym member directory with remaining subscription days countdown (`remainingDays`) and renewal alert actions.
-3. **Trainers & Training Staff:** Top 6 summary cards, searchable staff directory, profile inspector, add/edit trainer modal with confidential salary controls, assigned shifts, and resignation recording.
-4. **Recruitment & Vacancies:** 7 recruitment KPI cards, vacancy publishing/editing, dynamic deadlines, opening dates, and remaining position quotas.
-5. **Trainer Applications:** 8 pipeline stage cards, applicant search/filtering, full candidate detail drawer, resume download, status audit trail, interview scheduling, reviewer notes, and one-click **"Convert to Staff"**.
-6. **Staff Schedules:** Weekly rota grid & detailed shift table, shift assignment modal with server-side time conflict detection, and rest days tracking.
-7. **Subscriptions:** Live member subscription entitlements, renewal tracking, auto-renew, and premium active indicators.
-8. **Notifications:** Configured Gmail recipient list (`appu12813@gmail.com`), SMTP status, direct SMS gateway status, upcoming deadline alerts, and live email audit log.
-9. **Settings:** Admin console identity, JWT security details, recruitment paths, and raw PostgreSQL DB explorer access.
-
-### 4.2. Member Experience Portal
-- **Onboarding & Profile Setup:** 10-step preference setup calculating BMI and target daily calorie intake.
-- **3D Exercise Visualizer:** Interactive exercise catalog categorized by muscle groups.
-- **Custom Workout Routines:** Daily workout tracking, rest intervals, and recovery monitoring.
-- **Subscription Transparency:** Members can inspect plan start/end dates, active status, and renewing options.
-
-### 4.3. Public Careers & Hiring Portal (`/careers/trainers`)
-- Accessible to anyone without logging in.
-- Shows only currently open job postings with title, specialization, qualifications, experience, location, and salary ranges.
-- Allows candidates to apply with resume uploads (PDF/DOCX), privacy consent, and validation.
-- Auto-generates unique reference numbers (`APP-YYYY-XXXX`) and prevents duplicate submissions.
-
----
-
-## 5. Technology Stack Deep Dive
-
-| Layer | Technology | Version | Purpose in FitFlow |
-|---|---|---|---|
-| **Frontend Framework** | React.js | 18 / 19 | Declarative Single Page Application (SPA) architecture |
-| **Build Tool** | Vite | 8.x | High-performance client bundling and Hot Module Replacement |
-| **Styling** | Tailwind CSS | 3.x | Utility-first styling for FitFlow's dark gym aesthetic |
-| **Icons & UI** | Lucide React | Latest | Modern iconography across dashboard and careers portal |
-| **Backend Language** | Java | 21 LTS | Statically typed, object-oriented enterprise application layer |
-| **Backend Framework** | Spring Boot | 3.4.x | Convention-over-configuration REST APIs and dependency injection |
-| **Security** | Spring Security | 6.x | Security filter chains, role-based access control (RBAC), CORS |
-| **Authentication** | jjwt (JSON Web Token) | 0.11.x | Stateless cryptographic bearer authentication |
-| **Persistence / ORM** | Spring Data JPA / Hibernate | 6.6 | Object-Relational Mapping and repository abstractions |
-| **Database** | PostgreSQL | 17 | Relational ACID-compliant data storage |
-| **Database Tooling** | pgAdmin 4 | Latest | Database administration, table inspection, and SQL queries |
-| **Build System** | Apache Maven | 3.8+ | Dependency management, build lifecycle, and packaging |
-
----
-
-## 6. PostgreSQL Database Design
-
-### 6.1. Relational Entities Summary
+## 🗄️ Database Design (Entity-Relationship Diagram)
 
 ```mermaid
 erDiagram
@@ -167,292 +146,83 @@ erDiagram
     TRAINER_APPLICATIONS ||--o{ APPLICATION_STATUS_HISTORY : "tracks"
     TRAINER_APPLICATIONS |o--o| GYM_STAFF : "onboarded as"
     GYM_STAFF ||--o{ STAFF_SCHEDULES : "assigned to"
-```
-
-### 6.2. Core Tables Schema
-
-#### `fit_users` (Core User Accounts)
-- `id` (BIGSERIAL, PK)
-- `name` (VARCHAR)
-- `email` (VARCHAR, UNIQUE)
-- `password` (VARCHAR, BCrypt Encrypted)
-- `phone` (VARCHAR)
-- `role` (VARCHAR: `MEMBER`, `ADMIN`, `TRAINER`)
-- `enabled` (BOOLEAN)
-- `registered_at` (TIMESTAMP)
-
-#### `gym_staff` (Trainers & Staff Directory)
-- `id` (BIGSERIAL, PK)
-- `staff_code` (VARCHAR, UNIQUE: e.g. `STF-1001`)
-- `full_name` (VARCHAR)
-- `email` (VARCHAR, UNIQUE)
-- `phone` (VARCHAR)
-- `designation` (VARCHAR)
-- `specialization` (VARCHAR)
-- `years_of_experience` (NUMERIC)
-- `qualifications` (TEXT)
-- `monthly_salary` (NUMERIC, Confidential Admin Access Only)
-- `employment_type` (VARCHAR: `FULL_TIME`, `PART_TIME`, `CONTRACT`)
-- `status` (VARCHAR: `ACTIVE`, `INACTIVE`, `ON_LEAVE`, `RESIGNED`, `TERMINATED`)
-- `assigned_shift` (VARCHAR)
-- `joining_date` (DATE)
-- `resignation_date` (DATE)
-
-#### `job_vacancies` (Hiring Postings)
-- `id` (BIGSERIAL, PK)
-- `title` (VARCHAR)
-- `department` (VARCHAR)
-- `specialization` (VARCHAR)
-- `total_vacancies` (INT)
-- `filled_count` (INT)
-- `job_description` (TEXT)
-- `required_qualifications` (TEXT)
-- `minimum_experience_years` (NUMERIC)
-- `preferred_experience_years` (NUMERIC)
-- `employment_type` (VARCHAR)
-- `salary_range` (VARCHAR)
-- `location` (VARCHAR)
-- `opening_date` (DATE)
-- `application_deadline` (DATE)
-- `status` (VARCHAR: `DRAFT`, `SCHEDULED`, `OPEN`, `CLOSED`, `CANCELLED`)
-
-#### `trainer_applications` (Candidate Pipeline)
-- `id` (BIGSERIAL, PK)
-- `application_reference` (VARCHAR, UNIQUE: e.g. `APP-2026-6132`)
-- `vacancy_id` (BIGINT, FK -> `job_vacancies.id`)
-- `full_name` (VARCHAR)
-- `email` (VARCHAR)
-- `phone` (VARCHAR)
-- `current_location` (VARCHAR)
-- `desired_position` (VARCHAR)
-- `years_of_experience` (NUMERIC)
-- `specialization` (VARCHAR)
-- `educational_qualifications` (TEXT)
-- `fitness_certifications` (TEXT)
-- `previous_experience` (TEXT)
-- `professional_summary` (TEXT)
-- `expected_joining_date` (DATE)
-- `resume_path` (VARCHAR)
-- `status` (VARCHAR: `SUBMITTED`, `UNDER_REVIEW`, `SHORTLISTED`, `INTERVIEW_SCHEDULED`, `SELECTED`, `REJECTED`, `WITHDRAWN`)
-- `converted_to_staff` (BOOLEAN)
-- `converted_staff_id` (BIGINT, FK -> `gym_staff.id`)
-- `CONSTRAINT uq_app_vacancy_email UNIQUE (vacancy_id, email)`
-
-#### `staff_schedules` (Shift Assignments)
-- `id` (BIGSERIAL, PK)
-- `staff_id` (BIGINT, FK -> `gym_staff.id`)
-- `shift_name` (VARCHAR)
-- `start_time` (TIME)
-- `end_time` (TIME)
-- `working_days` (VARCHAR)
-- `schedule_date` (DATE)
-- `rest_days` (VARCHAR)
-- `status` (VARCHAR: `SCHEDULED`, `COMPLETED`, `CANCELLED`)
-
----
-
-## 7. REST API Endpoints Reference
-
-### Public Endpoints (No Authentication Required)
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/auth/register` | Register a new gym member account |
-| `POST` | `/api/auth/login` | Authenticate user and return signed JWT |
-| `GET` | `/api/careers/vacancies` | List all open, published job vacancies |
-| `GET` | `/api/careers/vacancies/{id}` | Detailed requirements for a vacancy |
-| `POST` | `/api/careers/vacancies/{id}/applications` | Submit application (multipart with resume or JSON) |
-
-### Member Endpoints (`hasAnyRole('MEMBER', 'ADMIN')`)
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/users/profile` | Get current member profile & metrics |
-| `PUT` | `/api/users/profile` | Update physical stats (weight, goal) |
-| `GET` | `/api/exercises` | Browse exercise catalog |
-| `GET` | `/api/workouts/routines` | Get saved member workout routines |
-
-### Admin Endpoints (`hasRole('ADMIN')`)
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/admin/dashboard/metrics` | Platform overview KPIs |
-| `GET` | `/api/admin/members` | Isolated member directory with remaining days |
-| `POST` | `/api/admin/users/{id}/toggle-status` | Activate/Deactivate user account |
-| `GET` | `/api/admin/staff` | Searchable staff directory with confidential payroll |
-| `POST` | `/api/admin/staff` | Add new trainer/staff member |
-| `PUT` | `/api/admin/staff/{id}` | Update trainer details |
-| `PATCH`| `/api/admin/staff/{id}/status` | Update employment status or record resignation |
-| `GET` | `/api/admin/vacancies` | List all vacancies (all statuses) |
-| `POST` | `/api/admin/vacancies` | Publish new vacancy |
-| `PATCH`| `/api/admin/vacancies/{id}/status` | Open, close, reopen, or cancel vacancy |
-| `GET` | `/api/admin/applications` | Candidate applications with filters |
-| `GET` | `/api/admin/applications/{id}/resume` | Download candidate resume document |
-| `PATCH`| `/api/admin/applications/{id}/status` | Transition status with audit log |
-| `POST` | `/api/admin/applications/{id}/interviews` | Schedule interview date/time/link |
-| `POST` | `/api/admin/applications/{id}/notes` | Append internal reviewer feedback note |
-| `POST` | `/api/admin/applications/{id}/convert-to-staff` | Onboard selected candidate to `gym_staff` |
-| `GET` | `/api/admin/staff-schedules` | Get weekly shift assignments |
-| `POST` | `/api/admin/staff-schedules` | Assign shift with collision detection |
-| `POST` | `/api/admin/subscriptions/reminders/send` | Broadcast deadline alerts to recipients |
-
----
-
-## 8. Installation & Setup Guide
-
-### 8.1. Prerequisites
-- **Java:** JDK 21+ installed and configured in `PATH`.
-- **Node.js:** v18+ or v20+.
-- **Database:** PostgreSQL 14+ running on port `5432`.
-- **Build Tool:** Apache Maven 3.8+.
-
-### 8.2. Database Configuration
-1. Open PostgreSQL terminal or pgAdmin 4:
-   ```sql
-   CREATE DATABASE fitflow;
-   ```
-2. Verify credentials in `backend/src/main/resources/application.properties`:
-   ```properties
-   spring.datasource.url=jdbc:postgresql://localhost:5432/fitflow
-   spring.datasource.username=postgres
-   spring.datasource.password=Appu@1234
-   ```
-
-### 8.3. Running the Backend
-1. Open a terminal in the `backend/` directory:
-   ```cmd
-   cd backend
-   mvn clean compile
-   mvn spring-boot:run
-   ```
-2. Backend starts on port `8080`.
-3. The database migration script `schema_staff_recruitment.sql` and `DataSeeder.java` run automatically on startup to seed test data.
-
-### 8.4. Running the Frontend
-1. Open a second terminal in the `frontend/` directory:
-   ```cmd
-   cd frontend
-   npm install
-   npm run dev
-   ```
-2. Open your browser at `http://localhost:5173`.
-3. To test production builds:
-   ```cmd
-   cmd /c "npm run build"
-   ```
-
----
-
-## 9. Default Test Accounts
-
-| Role | Email ID | Password | Access Level |
-|---|---|---|---|
-| **System Administrator** | `appu12813@gmail.com` | `Lulu@3002` | Full access to `/admin` dashboard, confidential payroll, candidate reviews, and shift scheduling. |
-| **Personal Trainer** | `trainer@fitflow.com` | `trainer123` | Trainer access to assigned routines and appointments. |
-| **Gym Member** | `member@fitflow.com` | `member123` | Member portal access: routines, profile, and subscription view. |
-
----
-
-## 10. University Final Review & Viva Preparation
-
-### 10.1. Common Viva Questions & Model Answers
-
-#### Q: How do you prevent two trainers from being scheduled at the same time?
-- **Answer:** *"In `StaffService.java`, the `createSchedule()` method queries existing shifts for the specified staff member. It checks if the new start and end times overlap with an existing shift on any of the specified working days. If an overlap is found, it throws an `IllegalArgumentException`, which returns an HTTP 400 Bad Request to the frontend with an alert message."*
-
-#### Q: Why are Members kept separate from Trainers in the Admin Dashboard?
-- **Answer:** *"A common issue in gym software is treating all users as one generic entity. In FitFlow, ordinary gym members are stored in `fit_users` with `Role.MEMBER` and tracked for subscription expiry and fitness metrics. Trainers and staff are stored in a dedicated `gym_staff` table containing professional designations, certifications, confidential monthly salaries, and shift rotas. The `GET /api/admin/members` endpoint filters exclusively for `Role.MEMBER` to prevent any data overlap."*
-
-#### Q: How does the candidate application workflow maintain an audit trail?
-- **Answer:** *"Every time an application transitions status (e.g., from `SUBMITTED` to `UNDER_REVIEW`, `SHORTLISTED`, or `SELECTED`), an `ApplicationStatusHistory` record is created in PostgreSQL with the previous status, new status, the admin's email, and the timestamp. This provides a complete hiring audit trail."*
-
-#### Q: How is candidate-to-staff conversion handled safely?
-- **Answer:** *"When an admin clicks 'Convert to Staff', the backend checks that `convertedToStaff` is false to prevent duplicate records. Within a single transaction, it creates a new `GymStaff` record, sets the application's `convertedToStaff` flag to true, links the staff ID, updates the status to `SELECTED`, and increments the vacancy's `filledCount`."*
-
-### 10.2. 5-Minute Live Demonstration Checklist
-1. Open `/careers/trainers` -> Show open vacancies and highlight that staff salaries remain hidden from the public.
-2. Click **"Apply Now"** -> Fill out the application form with resume upload and submit. Show the generated reference number (`APP-YYYY-XXXX`).
-3. Try re-submitting with the same email -> Show the duplicate application rejection message.
-4. Log in as Admin at `/admin/login` using `appu12813@gmail.com` / `Lulu@3002`.
-5. Open **Members** -> Show member records with remaining subscription day countdowns.
-6. Open **Staff Schedules** -> Show the weekly rota view and demonstrate shift conflict validation.
-7. Open **Trainer Applications** -> Inspect the application submitted in Step 2, update its status, and demonstrate the **"Convert to Staff"** workflow.
-
----
-
-## 11. Git & Version Control Conventions
-
-```bash
-# Clone the repository
-git clone https://github.com/Darshan-yadav-45/Gym-Management-System.git
-cd Gym-Management-System
-
-# Check status and recent commits
-git status
-git log --oneline -n 10
+    FIT_USERS ||--o{ EMAIL_DELIVERY_LOGS : "receives"
 ```
 
 ---
 
-## 12. Production Deployment & Live URLs
+## 📡 REST API Reference Summary
 
-FitFlow is fully deployed and configured across modern cloud infrastructure:
-
-| Component | Platform | Live URL / Connection |
+### Public Endpoints (No Token Required)
+| Method | Endpoint | Description |
 |---|---|---|
-| **Frontend Web App** | Vercel | [https://gym-management-system-sepia-chi.vercel.app/](https://gym-management-system-sepia-chi.vercel.app/) |
-| **Backend REST API** | Render | [https://fitflow-backend-qxvp.onrender.com](https://fitflow-backend-qxvp.onrender.com) |
-| **Database Tier** | Neon Serverless PostgreSQL | AWS us-east-1 Pooler (`ep-plain-base-bcek551l-pooler`) |
+| `POST` | `/api/auth/register` | Register a new member account & trigger welcome email |
+| `POST` | `/api/auth/login` | Authenticate credentials and receive signed JWT |
+| `GET` | `/api/careers/vacancies` | List currently open trainer vacancies |
+| `POST` | `/api/careers/vacancies/{id}/applications` | Submit coaching application with resume |
+
+### Member Endpoints (`ROLE_MEMBER` or `ROLE_ADMIN`)
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/users/profile` | Retrieve personal fitness metrics & BMI |
+| `GET` | `/api/exercises` | Browse 3D exercise catalog |
+| `GET` | `/api/workouts/routines` | Get saved daily workout routines |
+
+### Admin Endpoints (`ROLE_ADMIN` Only)
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/admin/dashboard/metrics` | Retrieve platform KPI metric overview |
+| `GET` | `/api/admin/members` | Member directory with remaining day countdowns |
+| `GET` | `/api/admin/staff` | Staff directory with confidential payroll |
+| `POST` | `/api/admin/staff-schedules` | Assign shift with server-side collision check |
+| `POST` | `/api/admin/applications/{id}/convert-to-staff` | 1-click candidate conversion to official staff |
+| `GET` | `/api/admin/email/memberships` | Email notification management & KPI overview |
+| `POST` | `/api/admin/email/send-reminder-2day/{userId}` | Trigger 2-day expiry reminder to specific user |
+| `POST` | `/api/admin/email/send-expired-notice/{userId}`| Trigger expired notification to specific user |
+| `POST` | `/api/admin/email/send-bulk` | Bulk dispatch reminders to selected users |
+| `POST` | `/api/admin/email/retry/{logId}` | Retry failed email notification delivery |
 
 ---
 
-## 13. Email Notification System & Scheduler
+## ⚙️ Environment Variables Reference
 
-FitFlow includes an enterprise-grade automated email notification engine built with Spring Boot Mail (`JavaMailSender`) and PostgreSQL delivery logging:
+When deploying to cloud hosts such as **Render** or **Vercel**, configure these variables:
 
-### 13.1. Notification Workflows
-
-1. **User Registration Welcome Email:**
-   - **Trigger:** Immediate upon successful user creation in PostgreSQL.
-   - **Subject:** `Welcome to FITFLOW – Your Fitness Journey Starts Here!`
-   - **Delivery:** Non-blocking async dispatch with dark/red branded HTML template.
-2. **2-Day Membership Expiry Reminder:**
-   - **Trigger:** Automated cron scheduler running daily at `08:05 AM` (`SubscriptionNotificationScheduler.java`).
-   - **Target:** Members whose plan expires between `today` and `today + 2 days`.
-   - **Subject:** `FITFLOW – Your Gym Membership Expires in 2 Days!`
-3. **Expired Membership Notice:**
-   - **Trigger:** Automated cron scheduler running daily at `08:10 AM`.
-   - **Target:** Subscriptions that have lapsed beyond the active validity period.
-   - **Subject:** `FITFLOW – Your Gym Membership Has Expired`
-
-### 13.2. Idempotency & Database Audit Logs
-- Every dispatched email is tracked in `email_delivery_logs` (`EmailDeliveryLog.java`).
-- Enforced with `@UniqueConstraint(name = "uq_email_log_user_type_date", columnNames = {"user_id", "notification_type", "scheduled_date"})` to ensure zero duplicate emails on restarts or repeated cron triggers.
-
-### 13.3. Admin Email Management Panel (`Membership Email Notifications`)
-- Located under `/admin` with direct navigation in the sidebar.
-- **6 Real-Time KPI Metric Cards:** Total Users, Active Members, Expiring in 2 Days, Expired Members, Emails Sent, Emails Failed.
-- **User Membership Table:** Filter by `All`, `Expiring in 2 Days`, `Active`, `Expired`, `Free`.
-- **Search:** Real-time filter across user names, registered emails, and plan types.
-- **Multi-User Selection & Bulk Actions:** Select individual or all users and trigger bulk 2-day reminders or expired notifications.
-- **Delivery Audit Log & Retry:** Complete delivery history with status badges (`SUCCESS` / `FAILED`) and 1-click **"Retry"** for any failed email.
-
-### 13.4. Backend Environment Variables for SMTP
-
-| Variable Name | Default Value | Description |
+| Environment Variable | Description | Example / Default |
 |---|---|---|
-| `MAIL_HOST` | `smtp.gmail.com` | SMTP host address |
-| `MAIL_PORT` | `587` | SMTP communication port |
-| `MAIL_USERNAME` | `appu12813@gmail.com` | Authenticated sender mailbox |
-| `MAIL_PASSWORD` | `<Google App Password>` | Secure 16-character application password |
-| `SMTP_ENABLED` | `true` | Flag to enable or safely mock mail delivery |
-| `MAIL_PROPERTIES_MAIL_SMTP_AUTH` | `true` | Enforces SMTP password authentication |
-| `MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE` | `true` | Enforces TLS encryption |
+| `SPRING_DATASOURCE_URL` | JDBC database connection URL | `jdbc:postgresql://<HOST>:5432/fitflow` |
+| `DB_USERNAME` | PostgreSQL database user | `postgres` |
+| `DB_PASSWORD` | PostgreSQL database password | `<YOUR_DATABASE_PASSWORD>` |
+| `JWT_SECRET` | 256-bit cryptographic signing key | `<YOUR_SECURE_JWT_SECRET>` |
+| `MAIL_HOST` | SMTP server host | `smtp.gmail.com` |
+| `MAIL_PORT` | SMTP port | `587` |
+| `MAIL_USERNAME` | Sender email address | `your_email@gmail.com` |
+| `MAIL_PASSWORD` | Google App Password (16 characters) | `<YOUR_GOOGLE_APP_PASSWORD>` |
+| `SMTP_ENABLED` | Set to `true` for live sending, `false` for mock logging | `true` |
+| `FRONTEND_URL` | Deployed frontend domain for CORS | `https://gym-management-system-sepia-chi.vercel.app` |
 
 ---
 
-## 14. Mobile-First Responsive Redesign Highlights
+## 🎓 Academic Defense & Viva Q&A Guide
 
-- **Mobile Navigation Drawer:** Slide-out drawer with high-contrast backdrop, touch-friendly navigation items with icons, close-on-tap outside, and keyboard `Escape` dismissal.
-- **Scroll-Lock Hook:** Prevents background body scrolling whenever the mobile menu, Aura AI chat modal, or legal modals are open.
-- **Hero Section:** Responsive typography (`text-3.5xl` scaling to `text-[6.2rem]`), reduced excessive vertical whitespace, dark contrast gradient overlays, and dynamic call-to-action buttons (`/dashboard/routines` when logged in vs `/register` for guests).
-- **Responsive Program Carousel:** Touch-friendly horizontal snapping carousel on mobile with custom left/right scroll controls on desktop.
-- **Mobile Touch Targets:** 44px+ minimum tap target sizes across buttons, form controls, and social links for flawless ergonomics on Android and iPhone devices.
+#### Q1: How does the system prevent two trainers from being scheduled at the same time?
+> **Answer:** *"In `StaffService.java`, the `createSchedule()` method inspects existing shifts for the target staff member across the requested days. If the new start and end times intersect with an active shift, it throws an `IllegalArgumentException`, resulting in an HTTP 400 Bad Request with an alert message."*
 
+#### Q2: How is candidate-to-staff conversion handled safely?
+> **Answer:** *"When an administrator clicks 'Convert to Staff', the backend validates that `convertedToStaff` is false. Inside a single `@Transactional` boundary, it creates a new `GymStaff` record, flags the application as converted, records an audit log transition to `SELECTED`, and increments the vacancy's filled position counter."*
+
+#### Q3: How do you prevent duplicate emails when the application restarts?
+> **Answer:** *"Every email delivery is logged in the `email_delivery_logs` table. A database-level unique constraint on `(user_id, notification_type, scheduled_date)` prevents duplicate records from ever being created or dispatched on the same day."*
+
+#### Q4: Why are regular members and trainers stored in separate tables?
+> **Answer:** *"Gym members have subscription periods, workout logs, and biometric statistics, whereas trainers have employment contracts, shifts, certifications, and confidential monthly salaries. Storing them in separate tables (`fit_users` vs `gym_staff`) enforces clean domain boundaries and prevents accidental exposure of payroll data."*
+
+---
+
+## 📝 License & Authorship
+
+- **Project:** FitFlow – Gym Management & Recruitment Intelligence System
+- **Candidate:** Java Full Stack Developer Intern
+- **Institution:** CMR University, Bengaluru
+- **Industry Partner:** Excerpt Technologies
+- **Faculty Guide:** Dr. Deepa A.

@@ -142,9 +142,9 @@ async function run() {
     await capture(adminPage, 'fig3-8_admin_login.png', 'Dedicated Administrator Login');
 
     // 8. fig3-9_admin_overview.png -> log in as admin -> /admin
-    console.log('\n9. Logging in as Admin (appu12813@gmail.com / Lulu@3002)...');
-    await adminPage.fill('input[name="email"]', 'appu12813@gmail.com');
-    await adminPage.fill('input[name="password"]', 'Lulu@3002');
+    console.log('\n9. Logging in as Admin (admin@fitflow.com / admin123)...');
+    await adminPage.fill('input[name="email"]', 'admin@fitflow.com');
+    await adminPage.fill('input[name="password"]', 'admin123');
     await adminPage.click('button[type="submit"]');
 
     await adminPage.waitForURL('**/admin/**', { timeout: 15000 });
