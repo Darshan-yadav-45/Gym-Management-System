@@ -19,7 +19,12 @@ import {
   Phone,
   Play,
   Send,
-  MessageSquare
+  MessageSquare,
+  Home as HomeIcon,
+  Dumbbell,
+  Users,
+  LogIn,
+  LayoutDashboard
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { authService } from '../services/authService';
@@ -119,6 +124,31 @@ export default function Home() {
       if (timer) clearInterval(timer);
     };
   }, []);
+
+  // Escape key handler to close mobile menu, AI chat modal, and legal modals
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+        setIsAiChatOpen(false);
+        setLegalModal(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Prevent background body scroll when mobile menu or modals are open
+  useEffect(() => {
+    if (mobileMenuOpen || isAiChatOpen || legalModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [mobileMenuOpen, isAiChatOpen, legalModal]);
 
   const scrollToSection = (id) => {
     setMobileMenuOpen(false);
@@ -448,49 +478,56 @@ export default function Home() {
       <header 
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled 
-            ? 'bg-[#0b0c10]/95 backdrop-blur-md border-b border-white/10 shadow-lg py-3.5' 
-            : 'bg-transparent py-5'
+            ? 'bg-[#0b0c10]/95 backdrop-blur-md border-b border-white/10 shadow-lg py-3 sm:py-3.5' 
+            : 'bg-gradient-to-b from-black/80 via-black/40 to-transparent py-4 sm:py-5'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 flex justify-between items-center">
           
           {/* Left: FIT in white and FLOW in bold red */}
           <button 
+            type="button"
             onClick={() => scrollToSection('hero')}
-            className="flex items-center text-2xl sm:text-3xl font-black font-display tracking-[0.15em] text-white hover:opacity-95 transition-opacity cursor-pointer"
+            className="flex items-center text-2xl sm:text-3xl font-black font-display tracking-[0.15em] text-white hover:opacity-95 transition-opacity cursor-pointer shrink-0"
+            aria-label="FitFlow Home"
           >
             FIT<span className="text-[#ef233c] font-black">FLOW</span>
           </button>
 
           {/* Center/Right Navigation: HOME, PROGRAMS, WHY FITFLOW, TRAINERS, AI COACH, LOGIN */}
-          <nav className="hidden md:flex items-center gap-7 lg:gap-9 text-xs font-bold tracking-widest uppercase text-gray-300">
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-xs font-bold tracking-widest uppercase text-gray-300">
             <button 
+              type="button"
               onClick={() => scrollToSection('hero')} 
-              className="text-white hover:text-[#ef233c] transition-colors cursor-pointer"
+              className="text-white hover:text-[#ef233c] transition-colors cursor-pointer py-1"
             >
               HOME
             </button>
             <button 
+              type="button"
               onClick={() => scrollToSection('programs')} 
-              className="text-gray-300 hover:text-[#ef233c] transition-colors cursor-pointer"
+              className="text-gray-300 hover:text-[#ef233c] transition-colors cursor-pointer py-1"
             >
               PROGRAMS
             </button>
             <button 
+              type="button"
               onClick={() => scrollToSection('why-fitflow')} 
-              className="text-gray-300 hover:text-[#ef233c] transition-colors cursor-pointer"
+              className="text-gray-300 hover:text-[#ef233c] transition-colors cursor-pointer py-1"
             >
               WHY FITFLOW
             </button>
             <button 
+              type="button"
               onClick={() => scrollToSection('trainers')} 
-              className="text-gray-300 hover:text-[#ef233c] transition-colors cursor-pointer"
+              className="text-gray-300 hover:text-[#ef233c] transition-colors cursor-pointer py-1"
             >
               TRAINERS
             </button>
             <button 
+              type="button"
               onClick={() => scrollToSection('ai-coach')} 
-              className="text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer flex items-center gap-1"
+              className="text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer flex items-center gap-1 py-1"
             >
               <Bot className="w-3.5 h-3.5" />
               <span>AI COACH</span>
@@ -498,14 +535,14 @@ export default function Home() {
             {currentUser ? (
               <Link 
                 to="/dashboard/routines" 
-                className="text-[#ef233c] hover:text-white transition-colors"
+                className="text-[#ef233c] hover:text-white transition-colors py-1 font-black"
               >
                 DASHBOARD
               </Link>
             ) : (
               <Link 
                 to="/login" 
-                className="text-gray-300 hover:text-[#ef233c] transition-colors"
+                className="text-gray-300 hover:text-[#ef233c] transition-colors py-1"
               >
                 LOGIN
               </Link>
@@ -516,81 +553,138 @@ export default function Home() {
           <div className="hidden sm:flex items-center gap-3">
             <Link 
               to={currentUser ? "/dashboard/routines" : "/register"} 
-              className="bg-[#ef233c] hover:bg-[#d90429] text-white px-6 py-2.5 rounded font-bold uppercase tracking-widest text-xs transition-all shadow-[0_4px_16px_rgba(239,35,60,0.35)] hover:-translate-y-0.5 active:scale-95"
+              className="bg-[#ef233c] hover:bg-[#d90429] text-white px-5 sm:px-6 py-2.5 rounded-full font-bold uppercase tracking-widest text-xs transition-all shadow-[0_4px_16px_rgba(239,35,60,0.35)] hover:-translate-y-0.5 active:scale-95"
             >
               {currentUser ? 'MY DASHBOARD' : 'JOIN NOW'}
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Hamburger Button */}
           <button 
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-gray-300 hover:text-white focus:outline-none cursor-pointer"
+            className="md:hidden p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-200 hover:text-white border border-white/10 transition-colors cursor-pointer active:scale-95"
             aria-label="Toggle navigation menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6 text-[#ef233c]" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
-        {/* Mobile Dropdown Menu */}
+        {/* ── Mobile Navigation Drawer with Backdrop ────────────── */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-[#121318]/98 backdrop-blur-xl border-b border-white/10 px-6 py-6 space-y-4 text-xs font-bold uppercase tracking-widest shadow-2xl animate-in slide-in-from-top-2 duration-200">
-            <button 
-              onClick={() => scrollToSection('hero')} 
-              className="block w-full text-left text-white hover:text-[#ef233c] py-2 border-b border-white/5 cursor-pointer"
+          <div className="fixed inset-0 z-50 md:hidden">
+            {/* Backdrop: Clicking outside closes drawer */}
+            <div 
+              className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity animate-in fade-in duration-200"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-hidden="true"
+            />
+
+            {/* Slide-out Drawer */}
+            <div 
+              className="fixed top-0 right-0 bottom-0 w-full max-w-[300px] sm:max-w-xs bg-[#121318] border-l border-white/10 shadow-2xl flex flex-col justify-between p-6 z-10 animate-in slide-in-from-right duration-300"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Mobile Navigation Menu"
             >
-              HOME
-            </button>
-            <button 
-              onClick={() => scrollToSection('programs')} 
-              className="block w-full text-left text-gray-300 hover:text-[#ef233c] py-2 border-b border-white/5 cursor-pointer"
-            >
-              PROGRAMS
-            </button>
-            <button 
-              onClick={() => scrollToSection('why-fitflow')} 
-              className="block w-full text-left text-gray-300 hover:text-[#ef233c] py-2 border-b border-white/5 cursor-pointer"
-            >
-              WHY FITFLOW
-            </button>
-            <button 
-              onClick={() => scrollToSection('trainers')} 
-              className="block w-full text-left text-gray-300 hover:text-[#ef233c] py-2 border-b border-white/5 cursor-pointer"
-            >
-              TRAINERS
-            </button>
-            <button 
-              onClick={() => scrollToSection('ai-coach')} 
-              className="block w-full text-left text-cyan-400 hover:text-cyan-300 py-2 border-b border-white/5 cursor-pointer"
-            >
-              AI COACH (AURA)
-            </button>
-            {currentUser ? (
-              <Link 
-                to="/dashboard/routines" 
-                onClick={() => setMobileMenuOpen(false)} 
-                className="block text-[#ef233c] py-2 border-b border-white/5"
-              >
-                DASHBOARD
-              </Link>
-            ) : (
-              <Link 
-                to="/login" 
-                onClick={() => setMobileMenuOpen(false)} 
-                className="block text-gray-300 hover:text-[#ef233c] py-2 border-b border-white/5"
-              >
-                LOGIN
-              </Link>
-            )}
-            <div className="pt-2">
-              <Link 
-                to={currentUser ? "/dashboard/routines" : "/register"} 
-                onClick={() => setMobileMenuOpen(false)}
-                className="block w-full text-center bg-[#ef233c] text-white py-3 rounded uppercase tracking-wider font-bold text-xs shadow-[0_4px_16px_rgba(239,35,60,0.4)]"
-              >
-                {currentUser ? 'MY DASHBOARD' : 'JOIN NOW'}
-              </Link>
+              <div>
+                {/* Drawer Top Header */}
+                <div className="flex items-center justify-between pb-5 border-b border-white/10 mb-6">
+                  <div className="flex items-center text-2xl font-black font-display tracking-[0.15em] text-white">
+                    FIT<span className="text-[#ef233c] font-black">FLOW</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition-colors cursor-pointer"
+                    aria-label="Close navigation menu"
+                  >
+                    <X className="w-5 h-5 text-[#ef233c]" />
+                  </button>
+                </div>
+
+                {/* Touch-Friendly Links with Icons */}
+                <nav className="space-y-1.5">
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection('hero')}
+                    className="flex items-center gap-3.5 w-full text-left px-4 py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider text-white hover:text-[#ef233c] hover:bg-white/5 transition-all cursor-pointer"
+                  >
+                    <HomeIcon className="w-4 h-4 text-[#ef233c]" />
+                    <span>Home</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection('programs')}
+                    className="flex items-center gap-3.5 w-full text-left px-4 py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider text-gray-300 hover:text-[#ef233c] hover:bg-white/5 transition-all cursor-pointer"
+                  >
+                    <Dumbbell className="w-4 h-4 text-gray-400" />
+                    <span>Programs</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection('why-fitflow')}
+                    className="flex items-center gap-3.5 w-full text-left px-4 py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider text-gray-300 hover:text-[#ef233c] hover:bg-white/5 transition-all cursor-pointer"
+                  >
+                    <Target className="w-4 h-4 text-gray-400" />
+                    <span>Why FitFlow</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection('trainers')}
+                    className="flex items-center gap-3.5 w-full text-left px-4 py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider text-gray-300 hover:text-[#ef233c] hover:bg-white/5 transition-all cursor-pointer"
+                  >
+                    <Users className="w-4 h-4 text-gray-400" />
+                    <span>Trainers</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection('ai-coach')}
+                    className="flex items-center gap-3.5 w-full text-left px-4 py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider text-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/30 transition-all cursor-pointer"
+                  >
+                    <Bot className="w-4 h-4 text-cyan-400" />
+                    <span>AI Coach (Aura)</span>
+                  </button>
+
+                  {currentUser ? (
+                    <Link
+                      to="/dashboard/routines"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3.5 w-full text-left px-4 py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider text-[#ef233c] hover:bg-white/5 transition-all"
+                    >
+                      <LayoutDashboard className="w-4 h-4 text-[#ef233c]" />
+                      <span>My Dashboard</span>
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3.5 w-full text-left px-4 py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider text-gray-300 hover:text-[#ef233c] hover:bg-white/5 transition-all"
+                    >
+                      <LogIn className="w-4 h-4 text-gray-400" />
+                      <span>Login</span>
+                    </Link>
+                  )}
+                </nav>
+              </div>
+
+              {/* Bottom CTA in Drawer */}
+              <div className="pt-6 border-t border-white/10 space-y-3">
+                <Link
+                  to={currentUser ? "/dashboard/routines" : "/register"}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center block bg-[#ef233c] hover:bg-[#d90429] text-white py-3.5 rounded-xl uppercase tracking-widest font-black text-xs transition-all shadow-[0_4px_18px_rgba(239,35,60,0.4)] active:scale-95"
+                >
+                  {currentUser ? 'GO TO DASHBOARD' : 'JOIN NOW'}
+                </Link>
+                <div className="text-center text-[10px] text-gray-500 font-semibold tracking-wider uppercase">
+                  Press ESC or tap outside to close
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -599,7 +693,7 @@ export default function Home() {
       {/* ======================================================== */}
       {/* 2. HERO SECTION (1-Second Smooth Slideshow Background)    */}
       {/* ======================================================== */}
-      <section id="hero" className="relative min-h-[96vh] flex items-center overflow-hidden bg-[#0b0c10]">
+      <section id="hero" className="relative min-h-[82vh] sm:min-h-[88vh] lg:min-h-[92vh] flex items-center overflow-hidden bg-[#0b0c10]">
         
         {/* Automatic crossfade background image slideshow (1000ms rotation) */}
         {HERO_IMAGES.map((imgSrc, idx) => (
@@ -615,46 +709,47 @@ export default function Home() {
           />
         ))}
 
-        {/* Dark gradient overlays leaving dark negative space on left & ensuring high contrast text readability */}
-        <div className="absolute inset-0 z-[2] bg-gradient-to-r from-[#0b0c10] via-[#0b0c10]/85 sm:via-[#0b0c10]/55 to-transparent pointer-events-none"></div>
-        <div className="absolute inset-0 z-[2] bg-gradient-to-t from-[#0b0c10] via-transparent to-[#0b0c10]/60 pointer-events-none"></div>
+        {/* Enhanced dark gradient overlays for high contrast and mobile readability */}
+        <div className="absolute inset-0 z-[2] bg-gradient-to-b from-[#0b0c10]/95 via-[#0b0c10]/85 to-[#0b0c10] sm:bg-gradient-to-r sm:from-[#0b0c10] sm:via-[#0b0c10]/75 sm:to-transparent pointer-events-none"></div>
+        <div className="absolute inset-0 z-[2] bg-gradient-to-t from-[#0b0c10] via-transparent to-[#0b0c10]/70 pointer-events-none"></div>
 
-        {/* Content Container (Left-aligned & stable during background rotation) */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 pt-32 sm:pt-36 pb-24 sm:pb-32 w-full">
+        {/* Content Container (Left-aligned & responsive padding on mobile) */}
+        <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-10 lg:px-12 pt-24 sm:pt-32 pb-14 sm:pb-24 lg:pt-36 lg:pb-32 w-full">
           <div className="max-w-3xl">
             
             {/* Live slideshow indicator pill */}
-            <div className="inline-flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-gray-300 mb-6">
+            <div className="inline-flex items-center gap-2 bg-black/70 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-gray-300 mb-5">
               <span className="w-2 h-2 rounded-full bg-[#ef233c] animate-pulse"></span>
-              <span>DYNAMIC FITFLOW EXPERIENCE • FRAME {heroIndex + 1}/{HERO_IMAGES.length}</span>
+              <span>FITFLOW DYNAMIC EXPERIENCE • {heroIndex + 1}/{HERO_IMAGES.length}</span>
             </div>
 
             {/* Headline */}
-            <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[5.5rem] xl:text-[6.2rem] font-display font-black uppercase tracking-tight leading-[0.92] mb-6">
-              <span className="block text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">TRAIN SMARTER.</span>
-              <span className="block text-[#ef233c] drop-shadow-[0_4px_24px_rgba(239,35,60,0.4)]">LIVE STRONGER.</span>
+            <h1 className="text-3.5xl sm:text-5xl md:text-7xl lg:text-[5.5rem] xl:text-[6.2rem] font-display font-black uppercase tracking-tight leading-[0.94] mb-5">
+              <span className="block text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.85)]">TRAIN SMARTER.</span>
+              <span className="block text-[#ef233c] drop-shadow-[0_4px_24px_rgba(239,35,60,0.45)]">LIVE STRONGER.</span>
             </h1>
 
             {/* Supporting Text with Red Accent Bar */}
-            <div className="border-l-[3px] border-[#ef233c] pl-4 sm:pl-5 mb-10 max-w-xl">
+            <div className="border-l-[3px] border-[#ef233c] pl-3.5 sm:pl-5 mb-8 max-w-xl">
               <p className="text-xs sm:text-sm md:text-base font-semibold tracking-wider uppercase text-gray-300 leading-relaxed drop-shadow-md">
                 YOUR PERSONALIZED FITNESS JOURNEY FOR<br className="hidden sm:inline" /> GYM AND HOME WORKOUTS.
               </p>
             </div>
 
             {/* Two CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 w-full sm:w-auto">
               <Link 
-                to="/register" 
-                className="bg-[#ef233c] hover:bg-[#d90429] text-white font-black uppercase tracking-widest text-xs sm:text-sm px-8 py-4 rounded-full transition-all duration-300 shadow-[0_4px_22px_rgba(239,35,60,0.5)] hover:shadow-[0_6px_28px_rgba(239,35,60,0.7)] flex items-center gap-2 group hover:-translate-y-0.5 active:scale-95"
+                to={currentUser ? "/dashboard/routines" : "/register"} 
+                className="w-full sm:w-auto text-center justify-center bg-[#ef233c] hover:bg-[#d90429] text-white font-black uppercase tracking-widest text-xs sm:text-sm px-8 py-4 rounded-full transition-all duration-300 shadow-[0_4px_22px_rgba(239,35,60,0.5)] hover:shadow-[0_6px_28px_rgba(239,35,60,0.7)] flex items-center gap-2 group hover:-translate-y-0.5 active:scale-95"
               >
-                <span>START YOUR JOURNEY</span>
+                <span>{currentUser ? "GO TO MY DASHBOARD" : "START YOUR JOURNEY"}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
 
               <button 
+                type="button"
                 onClick={() => scrollToSection('programs')} 
-                className="bg-[#14151b]/70 hover:bg-[#ef233c]/20 border border-[#ef233c] text-white font-black uppercase tracking-widest text-xs sm:text-sm px-8 py-4 rounded-full transition-all duration-300 flex items-center gap-2 hover:-translate-y-0.5 backdrop-blur-sm cursor-pointer"
+                className="w-full sm:w-auto text-center justify-center bg-[#14151b]/80 hover:bg-[#ef233c]/20 border border-[#ef233c] text-white font-black uppercase tracking-widest text-xs sm:text-sm px-8 py-4 rounded-full transition-all duration-300 flex items-center gap-2 hover:-translate-y-0.5 backdrop-blur-sm cursor-pointer"
               >
                 <span>EXPLORE PROGRAMS</span>
               </button>
@@ -721,7 +816,7 @@ export default function Home() {
             {programs.map((prog) => (
               <div 
                 key={prog.id}
-                className="w-[280px] sm:w-[300px] md:w-[320px] shrink-0 snap-start bg-[#181920] border border-white/5 hover:border-[#ef233c]/60 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between shadow-lg group"
+                className="w-[84vw] max-w-[320px] sm:w-[300px] md:w-[320px] shrink-0 snap-start bg-[#181920] border border-white/5 hover:border-[#ef233c]/60 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between shadow-lg group"
               >
                 <div>
                   <div className="relative h-44 w-full overflow-hidden bg-[#14151b]">
@@ -764,7 +859,7 @@ export default function Home() {
 
                 <div className="px-5 pb-5 pt-3 border-t border-white/5">
                   <Link 
-                    to="/register" 
+                    to={currentUser ? "/dashboard/routines" : "/register"} 
                     className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-gray-300 hover:text-[#ef233c] transition-colors"
                   >
                     <span>Start Program</span>
@@ -863,17 +958,18 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0b0c10] via-transparent to-[#0b0c10]/70"></div>
         <div className="absolute inset-0 bg-gradient-to-l from-[#0b0c10]/95 via-[#0b0c10]/50 to-transparent"></div>
 
-        <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 py-20 relative z-10 w-full flex justify-end">
-          <div className="max-w-xl text-right">
-            <h2 className="text-4xl sm:text-6xl md:text-7xl font-display uppercase tracking-tight leading-[0.95] mb-4">
+        <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 py-16 sm:py-20 relative z-10 w-full flex justify-center sm:justify-end">
+          <div className="max-w-xl text-center sm:text-right">
+            <h2 className="text-3xl sm:text-5xl md:text-7xl font-display uppercase tracking-tight leading-[0.95] mb-4">
               <span className="block font-black text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">GET OUT OF YOUR</span>
               <span className="block font-black text-[#ef233c] drop-shadow-[0_4px_24px_rgba(239,35,60,0.5)]">COMFORT ZONE</span>
             </h2>
-            <p className="text-gray-200 text-sm sm:text-base leading-relaxed mb-8 max-w-lg ml-auto font-medium">
+            <p className="text-gray-200 text-xs sm:text-sm md:text-base leading-relaxed mb-6 sm:mb-8 max-w-lg mx-auto sm:ml-auto font-medium">
               Push past your perceived limits with high-intensity coaching, intelligent biomechanical tracking, and progressive strength overload.
             </p>
             <div>
               <button 
+                type="button"
                 onClick={() => scrollToSection('programs')}
                 className="bg-[#ef233c] hover:bg-[#d90429] text-white font-bold uppercase tracking-wider text-xs px-8 py-3.5 rounded-full transition-all shadow-[0_4px_20px_rgba(239,35,60,0.6)] inline-flex items-center gap-2 hover:-translate-y-0.5 cursor-pointer"
               >

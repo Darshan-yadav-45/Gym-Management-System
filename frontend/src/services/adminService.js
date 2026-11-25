@@ -242,4 +242,29 @@ export const adminService = {
         const response = await api.post(`/admin/email/send-user-sms/${userId}`, payload);
         return response.data;
     },
+
+    getMembershipNotificationOverview: async () => {
+        const response = await api.get('/admin/email/memberships');
+        return response.data;
+    },
+
+    sendIndividual2DayReminder: async (userId) => {
+        const response = await api.post(`/admin/email/send-reminder-2day/${userId}`);
+        return response.data;
+    },
+
+    sendIndividualExpiredNotice: async (userId) => {
+        const response = await api.post(`/admin/email/send-expired-notice/${userId}`);
+        return response.data;
+    },
+
+    sendBulkReminders: async (userIds, type = '2DAY') => {
+        const response = await api.post('/admin/email/send-bulk', { userIds, type });
+        return response.data;
+    },
+
+    retryEmailNotification: async (logId) => {
+        const response = await api.post(`/admin/email/retry/${logId}`);
+        return response.data;
+    },
 };

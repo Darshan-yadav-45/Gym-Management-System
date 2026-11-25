@@ -52,27 +52,40 @@ public class SubscriptionNotificationScheduler {
     }
 
     /**
-     * Step 2 — Send 7-day expiry reminder emails.
+     * Step 2 — Send 2-day expiry reminder emails.
      * Runs daily at 08:05. Idempotent — won't re-send if already sent.
      */
     @Scheduled(cron = "0 5 8 * * *")
     public void sendExpiryReminders() {
-        log.info("[Scheduler] Running sendExpiryReminders (7-day)...");
+        log.info("[Scheduler] Running sendExpiryReminders (2-day & upcoming)...");
         LocalDate today = LocalDate.now();
+        LocalDate in2Days = today.plusDays(2);
         LocalDate in7Days = today.plusDays(7);
 
         try {
-            List<UserSubscription> expiring = subscriptionRepository.findExpiringBetween(today, in7Days);
-            log.info("[Scheduler] Found {} subscriptions expiring within 7 days.", expiring.size());
+            // Find subscriptions expiring within 2 days (priority 2-day reminder)
+            List<UserSubscription> expiring2Days = subscriptionRepository.findExpiringBetween(today, in2Days);
+            log.info("[Scheduler] Found {} subscriptions expiring within 2 days.", expiring2Days.size());
 
-            for (UserSubscription sub : expiring) {
+            for (UserSubscription sub : expiring2Days) {
+                try {
+                    String planName = sub.getPlan() != null ? sub.getPlan().getName() : "Premium Plan";
+                    emailService.sendExpiryReminder2Day(sub.getUser(), planName, sub.getEndDate());
+                    emailService.sendDeadlineToRecipients(sub, EmailService.TYPE_SUBSCRIPTION_EXPIRY_2D);
+                } catch (Exception e) {
+                    log.error("[Scheduler] Failed to send 2-day reminder to user {}: {}",
+                            sub.getUser().getEmail(), e.getMessage());
+                }
+            }
+
+            // Also check 7-day window for early notification
+            List<UserSubscription> expiring7Days = subscriptionRepository.findExpiringBetween(today, in7Days);
+            for (UserSubscription sub : expiring7Days) {
                 try {
                     String planName = sub.getPlan() != null ? sub.getPlan().getName() : "Premium Plan";
                     emailService.sendExpiryReminder7Day(sub.getUser(), planName, sub.getEndDate());
-                    emailService.sendDeadlineToRecipients(sub, EmailService.TYPE_ADMIN_DEADLINE_ALERT);
                 } catch (Exception e) {
-                    // Log per-user error and continue — don't stop the whole batch
-                    log.error("[Scheduler] Failed to send reminder to user {}: {}",
+                    log.error("[Scheduler] Failed to send 7-day reminder to user {}: {}",
                             sub.getUser().getEmail(), e.getMessage());
                 }
             }

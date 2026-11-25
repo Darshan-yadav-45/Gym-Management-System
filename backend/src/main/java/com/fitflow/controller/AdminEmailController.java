@@ -10,7 +10,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Admin-only controller for email testing and diagnostics.
@@ -247,5 +250,201 @@ public class AdminEmailController {
                 "emailEnabled", emailService.isEmailEnabled(),
                 "note", "SKIPPED emails indicate SMTP is not yet configured or duplicate send was avoided."
         ));
+    }
+
+    /**
+     * GET /api/admin/email/memberships
+     * Returns comprehensive user membership table data and notification metrics
+     * for the Membership Email Notifications panel.
+     */
+    @GetMapping("/memberships")
+    public ResponseEntity<?> getMembershipNotificationOverview() {
+        var users = userRepository.findAll();
+        var subscriptions = subscriptionRepository.findAll();
+        var today = java.time.LocalDate.now();
+        var twoDaysOut = today.plusDays(2);
+
+        Map<Long, com.fitflow.entity.UserSubscription> subMap = subscriptions.stream()
+                .filter(s -> s.getUser() != null)
+                .collect(Collectors.toMap(s -> s.getUser().getId(), s -> s, (a, b) -> a));
+
+        List<Map<String, Object>> memberRows = new ArrayList<>();
+        long activeCount = 0;
+        long expiring2DaysCount = 0;
+        long expiredCount = 0;
+
+        for (var u : users) {
+            var sub = subMap.get(u.getId());
+            String planName = (sub != null && sub.getPlan() != null) ? sub.getPlan().getName() : "Free Home Pack";
+            String startDateStr = (sub != null && sub.getStartDate() != null) ? sub.getStartDate().toString() : "—";
+            String endDateStr = (sub != null && sub.getEndDate() != null) ? sub.getEndDate().toString() : "—";
+
+            String status = "FREE";
+            boolean isExpiring2Days = false;
+            if (sub != null) {
+                if (sub.getStatus() == com.fitflow.entity.enums.SubscriptionStatus.ACTIVE) {
+                    activeCount++;
+                    if (sub.getEndDate() != null) {
+                        if (sub.getEndDate().isBefore(today)) {
+                            status = "EXPIRED";
+                            expiredCount++;
+                        } else if (!sub.getEndDate().isAfter(twoDaysOut)) {
+                            status = "EXPIRING_SOON";
+                            isExpiring2Days = true;
+                            expiring2DaysCount++;
+                        } else {
+                            status = "ACTIVE";
+                        }
+                    } else {
+                        status = "ACTIVE";
+                    }
+                } else if (sub.getStatus() == com.fitflow.entity.enums.SubscriptionStatus.EXPIRED) {
+                    status = "EXPIRED";
+                    expiredCount++;
+                } else {
+                    status = sub.getStatus().name();
+                }
+            }
+
+            // Retrieve latest email log for this user
+            var latestLog = emailLogRepository.findTopByUserIdOrderByCreatedAtDesc(u.getId());
+            String emailStatus = latestLog.map(com.fitflow.entity.EmailDeliveryLog::getDeliveryStatus).orElse("NONE");
+            String lastSentAt = latestLog.map(l -> l.getCreatedAt() != null ? l.getCreatedAt().toString() : "—").orElse("—");
+            String lastType = latestLog.map(com.fitflow.entity.EmailDeliveryLog::getNotificationType).orElse("—");
+            String errorMsg = latestLog.map(l -> l.getProviderResponse() != null ? l.getProviderResponse() : "").orElse("");
+
+            java.util.Map<String, Object> row = new java.util.HashMap<>();
+            row.put("userId", u.getId());
+            row.put("userName", u.getName());
+            row.put("email", u.getEmail());
+            row.put("membershipType", planName);
+            row.put("startDate", startDateStr);
+            row.put("expiryDate", endDateStr);
+            row.put("status", status);
+            row.put("isExpiring2Days", isExpiring2Days);
+            row.put("emailStatus", emailStatus);
+            row.put("lastEmailSentAt", lastSentAt);
+            row.put("lastEmailType", lastType);
+            row.put("errorMsg", errorMsg);
+            memberRows.add(row);
+        }
+
+        long sentCount = emailLogRepository.countByDeliveryStatus("SENT");
+        long failedCount = emailLogRepository.countByDeliveryStatus("FAILED");
+
+        Map<String, Object> summary = Map.of(
+                "totalUsers", users.size(),
+                "activeMemberships", activeCount,
+                "expiringWithin2Days", expiring2DaysCount,
+                "expiredMemberships", expiredCount,
+                "emailsSentSuccessfully", sentCount,
+                "emailsFailed", failedCount
+        );
+
+        return ResponseEntity.ok(Map.of(
+                "summary", summary,
+                "memberships", memberRows
+        ));
+    }
+
+    /**
+     * POST /api/admin/email/send-reminder-2day/{userId}
+     * Sends the 2-day membership expiry notification to an individual user.
+     */
+    @PostMapping("/send-reminder-2day/{userId}")
+    public ResponseEntity<?> sendIndividual2DayReminder(@PathVariable Long userId) {
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        var sub = subscriptionRepository.findByUserId(userId).orElse(null);
+        String planName = (sub != null && sub.getPlan() != null) ? sub.getPlan().getName() : "Premium Membership";
+        java.time.LocalDate expiryDate = (sub != null && sub.getEndDate() != null) ? sub.getEndDate() : java.time.LocalDate.now().plusDays(2);
+
+        emailService.sendExpiryReminder2Day(user, planName, expiryDate);
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "2-Day expiry reminder processed for " + user.getName() + " (" + user.getEmail() + ")."
+        ));
+    }
+
+    /**
+     * POST /api/admin/email/send-expired-notice/{userId}
+     * Sends the expired membership notification to an individual user.
+     */
+    @PostMapping("/send-expired-notice/{userId}")
+    public ResponseEntity<?> sendIndividualExpiredNotice(@PathVariable Long userId) {
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        var sub = subscriptionRepository.findByUserId(userId).orElse(null);
+        String planName = (sub != null && sub.getPlan() != null) ? sub.getPlan().getName() : "Premium Membership";
+        java.time.LocalDate expiryDate = (sub != null && sub.getEndDate() != null) ? sub.getEndDate() : java.time.LocalDate.now().minusDays(1);
+
+        emailService.sendSubscriptionExpired(user, planName, expiryDate);
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Membership expired notification processed for " + user.getName() + " (" + user.getEmail() + ")."
+        ));
+    }
+
+    /**
+     * POST /api/admin/email/send-bulk
+     * Sends bulk 2-day reminders or expired notifications to selected users.
+     */
+    @PostMapping("/send-bulk")
+    public ResponseEntity<?> sendBulkReminders(@RequestBody Map<String, Object> body) {
+        List<?> rawIds = (List<?>) body.get("userIds");
+        String notificationType = (String) body.getOrDefault("type", "2DAY");
+
+        if (rawIds == null || rawIds.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "No user IDs provided for bulk sending."));
+        }
+
+        int sent = 0;
+        int failed = 0;
+        for (Object item : rawIds) {
+            try {
+                Long uid = Long.valueOf(item.toString());
+                var userOpt = userRepository.findById(uid);
+                if (userOpt.isPresent()) {
+                    var u = userOpt.get();
+                    var sub = subscriptionRepository.findByUserId(uid).orElse(null);
+                    String planName = (sub != null && sub.getPlan() != null) ? sub.getPlan().getName() : "Premium Membership";
+                    if ("EXPIRED".equalsIgnoreCase(notificationType)) {
+                        java.time.LocalDate d = (sub != null && sub.getEndDate() != null) ? sub.getEndDate() : java.time.LocalDate.now().minusDays(1);
+                        emailService.sendSubscriptionExpired(u, planName, d);
+                    } else {
+                        java.time.LocalDate d = (sub != null && sub.getEndDate() != null) ? sub.getEndDate() : java.time.LocalDate.now().plusDays(2);
+                        emailService.sendExpiryReminder2Day(u, planName, d);
+                    }
+                    sent++;
+                }
+            } catch (Exception e) {
+                failed++;
+            }
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", String.format("Bulk delivery completed: %d processed, %d errors.", sent, failed),
+                "sentCount", sent,
+                "failedCount", failed
+        ));
+    }
+
+    /**
+     * POST /api/admin/email/retry/{logId}
+     * Retries sending a previously failed email from the audit log.
+     */
+    @PostMapping("/retry/{logId}")
+    public ResponseEntity<?> retryEmailNotification(@PathVariable Long logId) {
+        try {
+            var result = emailService.retryEmail(logId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 }

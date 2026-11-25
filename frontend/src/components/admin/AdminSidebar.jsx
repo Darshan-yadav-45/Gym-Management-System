@@ -8,6 +8,7 @@ import {
   Calendar, 
   CreditCard, 
   Bell, 
+  Mail,
   Settings, 
   ShieldCheck,
   ChevronRight,
@@ -22,7 +23,7 @@ export const ADMIN_SECTIONS = [
   { id: 'applications', label: 'Trainer Applications', icon: FileText, desc: 'Candidate pipeline & review' },
   { id: 'schedules', label: 'Staff Schedules', icon: Calendar, desc: 'Shift assignments & rotas' },
   { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard, desc: 'Member plan enrollments' },
-  { id: 'notifications', label: 'Notifications', icon: Bell, desc: 'Deadline alerts & email audit' },
+  { id: 'notifications', label: 'Email Notifications', icon: Mail, desc: 'Membership Expiry & Email Audit' },
   { id: 'settings', label: 'Settings', icon: Settings, desc: 'Admin console & integrations' }
 ];
 

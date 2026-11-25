@@ -43,11 +43,11 @@ export default function Register() {
         phone: formData.phone
       });
       
-      setSuccessMsg(response.message || 'Account created successfully! Redirecting to setup your athletic profile...');
+      setSuccessMsg('Welcome to FITFLOW! Your account has been created successfully and a welcome email has been sent. Redirecting to your athletic setup...');
       
       setTimeout(() => {
         navigate('/profile-setup');
-      }, 1200);
+      }, 1500);
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.response?.data || 'Registration failed. Please try again.';
       const msg = typeof errorMessage === 'string' ? errorMessage : 'Registration failed. Please try again.';

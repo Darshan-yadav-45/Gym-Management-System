@@ -49,6 +49,7 @@ public class EmailService {
 
     // ── Notification type constants ─────────────────────────────────────────
     public static final String TYPE_REGISTRATION_WELCOME   = "REGISTRATION_WELCOME";
+    public static final String TYPE_SUBSCRIPTION_EXPIRY_2D = "SUBSCRIPTION_EXPIRY_2D";
     public static final String TYPE_SUBSCRIPTION_EXPIRY_7D = "SUBSCRIPTION_EXPIRY_7D";
     public static final String TYPE_SUBSCRIPTION_EXPIRED   = "SUBSCRIPTION_EXPIRED";
     public static final String TYPE_SUBSCRIPTION_RENEWED   = "SUBSCRIPTION_RENEWED";
@@ -72,10 +73,28 @@ public class EmailService {
             return;
         }
 
-        String subject = "Welcome to FitFlow — Your Account is Ready";
+        String subject = "Welcome to FITFLOW – Your Fitness Journey Starts Here!";
         String body = buildWelcomeEmailBody(user.getName());
 
         sendAndLog(user, type, today, subject, body);
+    }
+
+    /**
+     * Sends the 2-day expiry reminder email.
+     * Idempotent per (user, type, expiryDate).
+     */
+    public void sendExpiryReminder2Day(User user, String planName, LocalDate expiryDate) {
+        String type = TYPE_SUBSCRIPTION_EXPIRY_2D;
+
+        if (isDuplicate(user.getId(), type, expiryDate)) {
+            log.info("Skipping duplicate {} email for user {}", type, user.getEmail());
+            return;
+        }
+
+        String subject = "FITFLOW – Your Gym Membership Expires in 2 Days!";
+        String body = buildExpiryReminder2DayBody(user.getName(), planName, expiryDate != null ? expiryDate.toString() : "N/A");
+
+        sendAndLog(user, type, expiryDate != null ? expiryDate : LocalDate.now(), subject, body);
     }
 
     /**
@@ -108,10 +127,10 @@ public class EmailService {
             return;
         }
 
-        String subject = "Your FitFlow subscription has expired";
-        String body = buildExpiredEmailBody(user.getName(), planName, expiryDate.toString());
+        String subject = "FITFLOW – Your Gym Membership Has Expired";
+        String body = buildExpiredEmailBody(user.getName(), planName, expiryDate != null ? expiryDate.toString() : "N/A");
 
-        sendAndLog(user, type, expiryDate, subject, body);
+        sendAndLog(user, type, expiryDate != null ? expiryDate : LocalDate.now(), subject, body);
     }
 
     /**
@@ -321,27 +340,78 @@ public class EmailService {
                   FIT<span style="font-style:italic">FLOW</span>
                 </h1>
                 <p style="color:#fff;margin:8px 0 0;opacity:.85;font-size:13px;text-transform:uppercase;letter-spacing:1px">
-                  Your account is ready
+                  GYM MANAGEMENT SYSTEM
                 </p>
               </div>
               <div style="padding:40px">
-                <h2 style="color:#fff;font-size:20px;margin:0 0 16px">Welcome, %s!</h2>
-                <p style="color:#9ca3af;font-size:14px;line-height:1.6;margin:0 0 24px">
-                  Your FitFlow account has been created. You are currently on the <strong style="color:#fff">Free Plan</strong>.
+                <h2 style="color:#fff;font-size:20px;margin:0 0 16px">Hello %s,</h2>
+                <p style="color:#ffffff;font-size:16px;font-weight:700;margin:0 0 16px">
+                  Welcome to FITFLOW!
+                </p>
+                <p style="color:#9ca3af;font-size:14px;line-height:1.6;margin:0 0 16px">
+                  Your account has been successfully created.
+                </p>
+                <p style="color:#9ca3af;font-size:14px;line-height:1.6;margin:0 0 16px">
+                  We are excited to support your fitness journey.
                 </p>
                 <p style="color:#9ca3af;font-size:14px;line-height:1.6;margin:0 0 24px">
-                  Get started by completing your fitness profile and selecting your AI coach from the coach directory.
+                  You can now explore our fitness programs, workouts and other available features.
                 </p>
-                <a href="#" style="display:inline-block;background:#ef233c;color:#fff;padding:14px 32px;border-radius:50px;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:1px;text-transform:uppercase">
+                <p style="color:#9ca3af;font-size:14px;line-height:1.6;margin:0 0 28px">
+                  Thank you for choosing FITFLOW.
+                </p>
+                <div style="border-top:1px solid #ffffff15;padding-top:20px;margin-bottom:24px">
+                  <p style="color:#e5e7eb;font-size:13px;margin:0 0 4px">Best Regards,</p>
+                  <p style="color:#ef233c;font-size:14px;font-weight:800;margin:0 0 2px">FITFLOW Team</p>
+                  <p style="color:#6b7280;font-size:11px;font-weight:700;letter-spacing:1px;margin:0">GYM MANAGEMENT SYSTEM</p>
+                </div>
+                <a href="#" style="display:inline-block;background:#ef233c;color:#fff;padding:12px 30px;border-radius:50px;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:1px;text-transform:uppercase">
                   Go to Dashboard
                 </a>
-                <p style="color:#4b5563;font-size:12px;margin:32px 0 0">
-                  This is an automated message from FitFlow. Please do not reply to this email.
-                </p>
               </div>
             </div>
             </body></html>
             """.formatted(name);
+    }
+
+    private String buildExpiryReminder2DayBody(String name, String planName, String endDate) {
+        return """
+            <!DOCTYPE html>
+            <html><body style="font-family:sans-serif;background:#0b0c10;color:#e5e7eb;margin:0;padding:0">
+            <div style="max-width:560px;margin:40px auto;background:#14151b;border-radius:16px;overflow:hidden;border:1px solid #ffffff10">
+              <div style="background:#f59e0b;padding:32px 40px">
+                <h1 style="color:#fff;margin:0;font-size:28px;font-weight:900;letter-spacing:2px">
+                  FIT<span style="font-style:italic">FLOW</span>
+                </h1>
+                <p style="color:#fff;margin:8px 0 0;opacity:.9;font-size:13px;text-transform:uppercase;letter-spacing:1px">
+                  2-Day Membership Expiry Alert
+                </p>
+              </div>
+              <div style="padding:40px">
+                <h2 style="color:#fff;font-size:20px;margin:0 0 16px">Hello %s,</h2>
+                <p style="color:#9ca3af;font-size:14px;line-height:1.6;margin:0 0 16px">
+                  This is a friendly reminder that your FITFLOW membership is scheduled to expire on <strong style="color:#f59e0b">%s</strong>.
+                </p>
+                <p style="color:#f59e0b;font-size:15px;font-weight:700;line-height:1.6;margin:0 0 16px">
+                  Only 2 days remain.
+                </p>
+                <p style="color:#9ca3af;font-size:14px;line-height:1.6;margin:0 0 24px">
+                  To continue enjoying your fitness journey and available membership benefits, please renew your membership before the expiry date.
+                </p>
+                <p style="color:#9ca3af;font-size:14px;line-height:1.6;margin:0 0 28px">
+                  Thank you for being part of FITFLOW.
+                </p>
+                <div style="border-top:1px solid #ffffff15;padding-top:20px;margin-bottom:24px">
+                  <p style="color:#e5e7eb;font-size:13px;margin:0 0 4px">Best Regards,</p>
+                  <p style="color:#ef233c;font-size:14px;font-weight:800;margin:0">FITFLOW Team</p>
+                </div>
+                <a href="#" style="display:inline-block;background:#ef233c;color:#fff;padding:12px 30px;border-radius:50px;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:1px;text-transform:uppercase">
+                  Renew Membership
+                </a>
+              </div>
+            </div>
+            </body></html>
+            """.formatted(name, endDate);
     }
 
     private String buildExpiryReminderBody(String name, String planName, String endDate) {
@@ -387,33 +457,74 @@ public class EmailService {
                 <h1 style="color:#fff;margin:0;font-size:28px;font-weight:900;letter-spacing:2px">
                   FIT<span style="font-style:italic">FLOW</span>
                 </h1>
-                <p style="color:#9ca3af;margin:8px 0 0;font-size:13px;text-transform:uppercase;letter-spacing:1px">
-                  Subscription update
+                <p style="color:#ef4444;margin:8px 0 0;font-size:13px;text-transform:uppercase;letter-spacing:1px;font-weight:700">
+                  Membership Expired
                 </p>
               </div>
               <div style="padding:40px">
-                <h2 style="color:#fff;font-size:20px;margin:0 0 16px">Hello, %s</h2>
-                <p style="color:#9ca3af;font-size:14px;line-height:1.6;margin:0 0 24px">
-                  Your <strong style="color:#fff">%s</strong> subscription ended on
-                  <strong style="color:#ef4444">%s</strong>.
+                <h2 style="color:#fff;font-size:20px;margin:0 0 16px">Hello %s,</h2>
+                <p style="color:#9ca3af;font-size:14px;line-height:1.6;margin:0 0 16px">
+                  Your FITFLOW membership expired on <strong style="color:#ef4444">%s</strong>.
                 </p>
-                <p style="color:#9ca3af;font-size:14px;line-height:1.6;margin:0 0 24px">
-                  Your account remains available under the free features currently offered by FitFlow.
-                  Premium features may require an active eligible subscription.
+                <p style="color:#ef4444;font-size:15px;font-weight:700;line-height:1.6;margin:0 0 16px">
+                  Your membership is currently expired.
                 </p>
-                <p style="color:#9ca3af;font-size:14px;line-height:1.6;margin:0 0 24px">
-                  If you would like to continue premium access, visit your FitFlow account to review the available plans.
+                <p style="color:#9ca3af;font-size:14px;line-height:1.6;margin:0 0 28px">
+                  Please contact the administrator or renew your membership to continue using the applicable membership services.
                 </p>
-                <a href="#" style="display:inline-block;background:#ef233c;color:#fff;padding:14px 32px;border-radius:50px;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:1px;text-transform:uppercase">
-                  View Plans
+                <div style="border-top:1px solid #ffffff15;padding-top:20px;margin-bottom:24px">
+                  <p style="color:#e5e7eb;font-size:13px;margin:0 0 4px">Thank you,</p>
+                  <p style="color:#ef233c;font-size:14px;font-weight:800;margin:0">FITFLOW Team</p>
+                </div>
+                <a href="#" style="display:inline-block;background:#ef233c;color:#fff;padding:12px 30px;border-radius:50px;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:1px;text-transform:uppercase">
+                  Renew Membership
                 </a>
-                <p style="color:#4b5563;font-size:12px;margin:32px 0 0">
-                  Thank you for being part of FitFlow. This is an automated message — please do not reply.
-                </p>
               </div>
             </div>
             </body></html>
-            """.formatted(name, planName, endDate);
+            """.formatted(name, endDate);
+    }
+
+    public Map<String, Object> retryEmail(Long logId) {
+        EmailDeliveryLog logEntry = deliveryLogRepository.findById(logId)
+                .orElseThrow(() -> new RuntimeException("Email delivery log record not found with id: " + logId));
+
+        if (!emailEnabled) {
+            throw new RuntimeException("Live SMTP is disabled in application properties. Configure SMTP credentials before retrying.");
+        }
+
+        try {
+            logEntry.setAttemptCount(logEntry.getAttemptCount() + 1);
+            logEntry.setLastAttemptAt(LocalDateTime.now());
+
+            String body;
+            String type = logEntry.getNotificationType();
+            String userName = logEntry.getUser() != null ? logEntry.getUser().getName() : "Athlete";
+            String dateStr = logEntry.getScheduledDate() != null ? logEntry.getScheduledDate().toString() : "N/A";
+
+            if (TYPE_REGISTRATION_WELCOME.equals(type)) {
+                body = buildWelcomeEmailBody(userName);
+            } else if (TYPE_SUBSCRIPTION_EXPIRY_2D.equals(type)) {
+                body = buildExpiryReminder2DayBody(userName, "Membership Plan", dateStr);
+            } else if (TYPE_SUBSCRIPTION_EXPIRED.equals(type)) {
+                body = buildExpiredEmailBody(userName, "Membership Plan", dateStr);
+            } else {
+                body = buildDeadlineAlertEmailBody(userName, logEntry.getRecipientEmail(), "Membership Plan", dateStr, "EXPIRED");
+            }
+
+            sendHtmlEmail(logEntry.getRecipientEmail(), logEntry.getSubject(), body);
+            logEntry.setDeliveryStatus("SENT");
+            logEntry.setProviderResponse("Dispatched successfully on retry via SMTP server.");
+            deliveryLogRepository.save(logEntry);
+
+            return Map.of("success", true, "message", "Email re-sent successfully to " + logEntry.getRecipientEmail());
+        } catch (Exception e) {
+            String err = e.getMessage() != null ? e.getMessage() : e.toString();
+            logEntry.setDeliveryStatus("FAILED");
+            logEntry.setProviderResponse("Retry failed: " + err);
+            deliveryLogRepository.save(logEntry);
+            throw new RuntimeException("Retry delivery failed: " + err);
+        }
     }
 
     private String buildTestEmailBody(String name) {

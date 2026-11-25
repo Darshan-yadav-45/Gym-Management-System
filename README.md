@@ -391,3 +391,68 @@ git log --oneline -n 10
 
 ---
 
+## 12. Production Deployment & Live URLs
+
+FitFlow is fully deployed and configured across modern cloud infrastructure:
+
+| Component | Platform | Live URL / Connection |
+|---|---|---|
+| **Frontend Web App** | Vercel | [https://gym-management-system-sepia-chi.vercel.app/](https://gym-management-system-sepia-chi.vercel.app/) |
+| **Backend REST API** | Render | [https://fitflow-backend-qxvp.onrender.com](https://fitflow-backend-qxvp.onrender.com) |
+| **Database Tier** | Neon Serverless PostgreSQL | AWS us-east-1 Pooler (`ep-plain-base-bcek551l-pooler`) |
+
+---
+
+## 13. Email Notification System & Scheduler
+
+FitFlow includes an enterprise-grade automated email notification engine built with Spring Boot Mail (`JavaMailSender`) and PostgreSQL delivery logging:
+
+### 13.1. Notification Workflows
+
+1. **User Registration Welcome Email:**
+   - **Trigger:** Immediate upon successful user creation in PostgreSQL.
+   - **Subject:** `Welcome to FITFLOW – Your Fitness Journey Starts Here!`
+   - **Delivery:** Non-blocking async dispatch with dark/red branded HTML template.
+2. **2-Day Membership Expiry Reminder:**
+   - **Trigger:** Automated cron scheduler running daily at `08:05 AM` (`SubscriptionNotificationScheduler.java`).
+   - **Target:** Members whose plan expires between `today` and `today + 2 days`.
+   - **Subject:** `FITFLOW – Your Gym Membership Expires in 2 Days!`
+3. **Expired Membership Notice:**
+   - **Trigger:** Automated cron scheduler running daily at `08:10 AM`.
+   - **Target:** Subscriptions that have lapsed beyond the active validity period.
+   - **Subject:** `FITFLOW – Your Gym Membership Has Expired`
+
+### 13.2. Idempotency & Database Audit Logs
+- Every dispatched email is tracked in `email_delivery_logs` (`EmailDeliveryLog.java`).
+- Enforced with `@UniqueConstraint(name = "uq_email_log_user_type_date", columnNames = {"user_id", "notification_type", "scheduled_date"})` to ensure zero duplicate emails on restarts or repeated cron triggers.
+
+### 13.3. Admin Email Management Panel (`Membership Email Notifications`)
+- Located under `/admin` with direct navigation in the sidebar.
+- **6 Real-Time KPI Metric Cards:** Total Users, Active Members, Expiring in 2 Days, Expired Members, Emails Sent, Emails Failed.
+- **User Membership Table:** Filter by `All`, `Expiring in 2 Days`, `Active`, `Expired`, `Free`.
+- **Search:** Real-time filter across user names, registered emails, and plan types.
+- **Multi-User Selection & Bulk Actions:** Select individual or all users and trigger bulk 2-day reminders or expired notifications.
+- **Delivery Audit Log & Retry:** Complete delivery history with status badges (`SUCCESS` / `FAILED`) and 1-click **"Retry"** for any failed email.
+
+### 13.4. Backend Environment Variables for SMTP
+
+| Variable Name | Default Value | Description |
+|---|---|---|
+| `MAIL_HOST` | `smtp.gmail.com` | SMTP host address |
+| `MAIL_PORT` | `587` | SMTP communication port |
+| `MAIL_USERNAME` | `appu12813@gmail.com` | Authenticated sender mailbox |
+| `MAIL_PASSWORD` | `<Google App Password>` | Secure 16-character application password |
+| `SMTP_ENABLED` | `true` | Flag to enable or safely mock mail delivery |
+| `MAIL_PROPERTIES_MAIL_SMTP_AUTH` | `true` | Enforces SMTP password authentication |
+| `MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE` | `true` | Enforces TLS encryption |
+
+---
+
+## 14. Mobile-First Responsive Redesign Highlights
+
+- **Mobile Navigation Drawer:** Slide-out drawer with high-contrast backdrop, touch-friendly navigation items with icons, close-on-tap outside, and keyboard `Escape` dismissal.
+- **Scroll-Lock Hook:** Prevents background body scrolling whenever the mobile menu, Aura AI chat modal, or legal modals are open.
+- **Hero Section:** Responsive typography (`text-3.5xl` scaling to `text-[6.2rem]`), reduced excessive vertical whitespace, dark contrast gradient overlays, and dynamic call-to-action buttons (`/dashboard/routines` when logged in vs `/register` for guests).
+- **Responsive Program Carousel:** Touch-friendly horizontal snapping carousel on mobile with custom left/right scroll controls on desktop.
+- **Mobile Touch Targets:** 44px+ minimum tap target sizes across buttons, form controls, and social links for flawless ergonomics on Android and iPhone devices.
+
